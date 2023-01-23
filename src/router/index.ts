@@ -13,14 +13,27 @@ const routes = [
       },
       {
         path: "device/:id",
-        component: () => import("@/views/Device.vue"),
+        redirect: (to: any) => {
+          return { path: "/device/" + to.params.id + "/graphs" };
+        },
+        component: () => import("@/views/device/Device.vue"),
         beforeEnter: (to: any) => {
           let appStore = useAppStore();
-          
-          appStore.device_panel.device(to.params.id)
+
+          appStore.device_panel.device(to.params.id);
         },
+        children: [
+          {
+            path: "graphs",
+            component: () => import("@/views/device/GraphPanel.vue"),
+          },
+          {
+            path: "control",
+            component: () => import("@/views/device/ControlPanel.vue"),
+          },
+        ],
       },
-    ]
+    ],
   },
   {
     path: "/new-device",
