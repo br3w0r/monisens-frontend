@@ -1,11 +1,11 @@
 import { defineStore } from "pinia";
-import { DevicePanel, Device } from "../controller/device";
+import { Controller, Device } from "../controller/controller";
 
 export const useAppStore = defineStore("app", {
   state: () => ({
     menu: true,
     about: false,
-    device_panel: new DevicePanel([
+    controller: new Controller([
       new Device("Room condition"),
       new Device("Entrance door"),
     ]),

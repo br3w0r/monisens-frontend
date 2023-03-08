@@ -1,12 +1,24 @@
 <script setup lang="ts">
 import { RouterView } from "vue-router";
+import { Fetcher } from "openapi-typescript-fetch";
+
 import { useAppStore } from "./store/app";
+import { paths } from "./api/contract";
 
 const appStore = useAppStore();
+
+// const fetcher = Fetcher.for<paths>();
+
+// const url = "/service/obtain-device-conf-info";
+// const response = await fetcher.path(url).method("post").create()({
+//   device_id: 666,
+// });
+
+// console.log(response);
 </script>
 
 <template>
-  <VApp id="inspire">
+  <VApp>
     <VAppBar app elevation="1">
       <VAppBarNavIcon @click.stop="appStore.menu_toggle"></VAppBarNavIcon>
       <VTabs>
@@ -86,15 +98,20 @@ const appStore = useAppStore();
 
     <VNavigationDrawer v-model="appStore.menu">
       <VList>
-        <VListItem link prepend-icon="mdi-star" title="Favourites" to="/favourites" />
+        <VListItem
+          link
+          prepend-icon="mdi-star"
+          title="Favourites"
+          to="/favourites"
+        />
         <VListItem
           link
           prepend-icon="mdi-circle"
-          v-for="(device, index) in appStore.device_panel.device_list"
+          v-for="(device, index) in appStore.controller.device_list"
           :key="index"
           :title="device.name"
           :to="'/device/' + index"
-          @click.stop="appStore.device_panel.device(index)"
+          @click.stop="appStore.controller.device(index)"
         />
       </VList>
     </VNavigationDrawer>

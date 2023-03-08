@@ -20,7 +20,7 @@ const routes = [
         beforeEnter: (to: any) => {
           let appStore = useAppStore();
 
-          appStore.device_panel.device(to.params.id);
+          appStore.controller.device(to.params.id);
         },
         children: [
           {

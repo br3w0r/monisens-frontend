@@ -35,7 +35,7 @@ const chartData = {
 </script>
 
 <template>
-  <div>Graphs for device "{{ appStore.device_panel.cur_device?.name }}"</div>
+  <div>Graphs for device "{{ appStore.controller.cur_device?.name }}"</div>
 
   <Line :data="chartData" />
 </template>

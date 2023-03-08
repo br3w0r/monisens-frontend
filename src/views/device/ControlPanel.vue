@@ -6,6 +6,6 @@ const appStore = useAppStore();
 
 <template>
     <div>
-      Control panel for device "{{ appStore.device_panel.cur_device?.name }}"
+      Control panel for device "{{ appStore.controller.cur_device?.name }}"
     </div>
 </template>
