@@ -1,20 +1,8 @@
 <script setup lang="ts">
 import { RouterView } from "vue-router";
-import { Fetcher } from "openapi-typescript-fetch";
-
 import { useAppStore } from "./store/app";
-import { paths } from "./api/contract";
 
 const appStore = useAppStore();
-
-// const fetcher = Fetcher.for<paths>();
-
-// const url = "/service/obtain-device-conf-info";
-// const response = await fetcher.path(url).method("post").create()({
-//   device_id: 666,
-// });
-
-// console.log(response);
 </script>
 
 <template>

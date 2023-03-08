@@ -1,4 +1,4 @@
-import { paths } from "./contract";
+import { paths, components } from "./contract";
 import { Fetcher } from "openapi-typescript-fetch";
 
 class Api {
@@ -7,9 +7,7 @@ class Api {
   async start_device_init(
     name: string,
     file: File
-  ): Promise<
-    paths["/service/start-device-init"]["post"]["responses"][200 | 500]
-  > {
+  ): Promise<components["schemas"]["DeviceStartInitResponse"]> {
     const form = new FormData();
     form.append("device_name", name);
     form.append("module_file", file);
@@ -23,6 +21,11 @@ class Api {
       (resp) => resp.json()
     );
   }
+
+  public readonly connect_device = this.fetcher
+    .path("/service/connect-device")
+    .method("post")
+    .create();
 }
 
 export default new Api();

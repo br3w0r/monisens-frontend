@@ -1,4 +1,5 @@
 import { DeviceInit } from "./device_init";
+import { components } from "../api/contract";
 
 export enum PendingStatus {
   None,
@@ -73,6 +74,14 @@ export class Controller {
     this._device_init = new DeviceInit();
 
     await this._device_init.start_device_init(name, file);
+
+    this._pending_status = PendingStatus.None;
+  }
+
+  async connect_device() {
+    this._pending_status = PendingStatus.Pending;
+
+    await this._device_init?.connect_device();
 
     this._pending_status = PendingStatus.None;
   }

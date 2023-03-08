@@ -37,7 +37,7 @@ const routes = [
   },
   {
     path: "/new-device",
-    component: () => import("@/views/NewDevice.vue"),
+    component: () => import("@/views/new_device/NewDevice.vue"),
   },
 ];
 

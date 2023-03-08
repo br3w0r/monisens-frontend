@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { useAppStore } from "../store/app";
-import { useNewDeviceStore } from "../store/new_device";
-import { DeviceInitState } from "../controller/device_init";
+import { useAppStore } from "../../store/app";
+import { useNewDeviceStore } from "../../store/new_device";
+import { DeviceInitState } from "../../controller/device_init";
+import Connect from "./Connect.vue";
 
 const appStore = useAppStore();
 const newDeviceStore = useNewDeviceStore();
 </script>
 
 <template>
+  <!-- Start init -->
   <VForm
     v-bind:disabled="!appStore.controller.is_idle"
     v-show="
@@ -15,8 +17,8 @@ const newDeviceStore = useNewDeviceStore();
       appStore.controller.device_init.init_state == DeviceInitState.None
     "
   >
-    <!-- Start init -->
     <VContainer>
+      <h1>1. Start initialization</h1>
       <VTextField
         label="Device name"
         v-model="newDeviceStore.device_name"
@@ -43,14 +45,21 @@ const newDeviceStore = useNewDeviceStore();
   </VForm>
 
   <!-- Connect -->
-  <VForm
-    v-bind:disabled="!appStore.controller.is_idle"
+  <Connect
     v-show="
       appStore.controller.device_init?.init_state == DeviceInitState.Connect
     "
+  ></Connect>
+
+  <!-- Configure -->
+  <VForm
+    v-bind:disabled="!appStore.controller.is_idle"
+    v-show="
+      appStore.controller.device_init?.init_state == DeviceInitState.Configure
+    "
   >
     <VContainer>
-      <p>Connect window</p>
+      <h1>3. Configure device</h1>
     </VContainer>
   </VForm>
 </template>
