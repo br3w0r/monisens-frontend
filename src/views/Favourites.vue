@@ -8,7 +8,7 @@ const appStore = useAppStore();
 
 <template>
   <div>This is a Favourites page</div>
-  <img src="../assets/shrug.webp" />
+  <img src="../static/shrug.webp" />
 </template>
 
 <style scoped></style>
