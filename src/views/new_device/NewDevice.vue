@@ -3,6 +3,7 @@ import { useAppStore } from "../../store/app";
 import { useNewDeviceStore } from "../../store/new_device";
 import { DeviceInitState } from "../../controller/device_init";
 import Connect from "./Connect.vue";
+import Configure from "./Configure.vue";
 
 const appStore = useAppStore();
 const newDeviceStore = useNewDeviceStore();
@@ -33,12 +34,7 @@ const newDeviceStore = useNewDeviceStore();
         :disabled="
           !newDeviceStore.start_init_available || !appStore.controller.is_idle
         "
-        @click.stop="
-          appStore.controller.start_device_init(
-            newDeviceStore.device_name,
-            newDeviceStore.module_file[0]
-          )
-        "
+        @click.stop="newDeviceStore.start_device_init()"
         >Start Init</VBtn
       >
     </VContainer>
@@ -52,16 +48,18 @@ const newDeviceStore = useNewDeviceStore();
   ></Connect>
 
   <!-- Configure -->
-  <VForm
-    v-bind:disabled="!appStore.controller.is_idle"
+  <Configure
     v-show="
       appStore.controller.device_init?.init_state == DeviceInitState.Configure
     "
+  ></Configure>
+
+  <!-- Done -->
+  <h1
+    v-show="appStore.controller.device_init?.init_state == DeviceInitState.Done"
   >
-    <VContainer>
-      <h1>3. Configure device</h1>
-    </VContainer>
-  </VForm>
+    You're all set!
+  </h1>
 </template>
 
 <style scoped></style>

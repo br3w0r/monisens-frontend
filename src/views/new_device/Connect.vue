@@ -11,8 +11,7 @@ const newDeviceStore = useNewDeviceStore();
     <VContainer>
       <h1>2. Connect to the device</h1>
       <div
-        v-for="(conn_param, index) in appStore.controller.device_init
-          ?.conn_params"
+        v-for="(conn_param, index) in newDeviceStore.conn_params"
         :key="index"
       >
         <!-- Bool -->
@@ -51,7 +50,7 @@ const newDeviceStore = useNewDeviceStore();
         :disabled="
           !newDeviceStore.start_init_available || !appStore.controller.is_idle
         "
-        @click.stop="appStore.controller.connect_device()"
+        @click.stop="newDeviceStore.connect_device()"
         >Connect</VBtn
       >
     </VContainer>

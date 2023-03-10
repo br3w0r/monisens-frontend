@@ -15,9 +15,9 @@ export class Device {
 }
 
 export class Controller {
-  private _pending_status: PendingStatus = PendingStatus.None;
+  private _pending_status = PendingStatus.None;
 
-  private _device_init: DeviceInit | null = null;
+  private _device_init = new DeviceInit();
 
   // Device vars
   private _current_device: number = -1;
@@ -27,7 +27,7 @@ export class Controller {
     return this._pending_status == PendingStatus.None;
   }
 
-  get device_init(): DeviceInit | null {
+  get device_init(): DeviceInit {
     return this._device_init;
   }
 
@@ -65,24 +65,37 @@ export class Controller {
     this._device_list.push(device);
   }
 
-  async start_device_init(name: string, file: File) {
-    if (this._device_init != null) {
-      // TODO: error if this.device_init != null
-    }
-
+  async start_device_init(
+    name: string,
+    file: File
+  ): Promise<components["schemas"]["ConnParamConf"][]> {
     this._pending_status = PendingStatus.Pending;
     this._device_init = new DeviceInit();
+    const conn_params = await this._device_init.start_device_init(name, file);
+    this._pending_status = PendingStatus.None;
 
-    await this._device_init.start_device_init(name, file);
+    return conn_params;
+  }
 
+  async connect_device(connect_conf: components["schemas"]["ConnParam"][]) {
+    this._pending_status = PendingStatus.Pending;
+    await this._device_init?.connect_device(connect_conf);
     this._pending_status = PendingStatus.None;
   }
 
-  async connect_device() {
+  async obtain_device_conf_info(): Promise<
+    components["schemas"]["DeviceConfInfoEntry"][]
+  > {
     this._pending_status = PendingStatus.Pending;
+    const res = await this._device_init.obtain_device_conf_info();
+    this._pending_status = PendingStatus.None;
 
-    await this._device_init?.connect_device();
+    return res;
+  }
 
+  async configure_device(confs: components["schemas"]["DeviceConfEntry"][]) {
+    this._pending_status = PendingStatus.Pending;
+    await this._device_init.configure_device(confs);
     this._pending_status = PendingStatus.None;
   }
 }

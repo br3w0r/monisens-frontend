@@ -1,14 +1,145 @@
 import { defineStore } from "pinia";
 import { components } from "../api/contract";
+import { useAppStore } from "./app";
 
 export const useNewDeviceStore = defineStore("new_device", {
   state: () => ({
     device_name: "",
     module_file: new Array<File>(),
+    conn_params: new Array<components["schemas"]["ConnParamConf"]>(),
     connect_conf: new Array<components["schemas"]["ConnParam"]>(),
+    conf_info: new Array<components["schemas"]["DeviceConfInfoEntry"]>(),
+    confs: new Map<number, components["schemas"]["DeviceConfType"]>(),
   }),
   getters: {
     start_init_available: (state) =>
       state.device_name.length > 0 && state.module_file.length == 1,
+  },
+  actions: {
+    conf_by_id(id: number): components["schemas"]["DeviceConfType"] {
+      const res = this.confs.get(id);
+      if (res) {
+        return res;
+      }
+      return {} as components["schemas"]["DeviceConfType"];
+    },
+
+    /** `assign_conf` prepares a container for device configuration */
+    assign_conf(value: components["schemas"]["DeviceConfInfoEntry"][]) {
+      value.forEach((val) => {
+        if (val.id == 0 && val.data.Section) {
+          this.assign_conf(val.data.Section);
+          return;
+        }
+
+        const conf: components["schemas"]["DeviceConfType"] = (() => {
+          if (val.data.String) {
+            return {
+              String: val.data.String.default ? val.data.String.default : "",
+            };
+          } else if (val.data.Int) {
+            return {
+              Int: val.data.Int.default ? val.data.Int.default : 0,
+            };
+          } else if (val.data.IntRange) {
+            return {
+              IntRange: [
+                val.data.IntRange.def_from ? val.data.IntRange.def_from : 0,
+                val.data.IntRange.def_to ? val.data.IntRange.def_to : 10,
+              ],
+            };
+          } else if (val.data.Float) {
+            return {
+              Float: val.data.Float.default ? val.data.Float.default : 0.0,
+            };
+          } else if (val.data.FloatRange) {
+            return {
+              FloatRange: [
+                val.data.FloatRange.def_from
+                  ? val.data.FloatRange.def_from
+                  : 0.0,
+                val.data.FloatRange.def_to ? val.data.FloatRange.def_to : 10.0,
+              ],
+            };
+          } else if (val.data.JSON) {
+            return {
+              JSON: val.data.JSON.default ? val.data.JSON.default : "",
+            };
+          } else if (val.data.ChoiceList) {
+            return {
+              ChoiceList: val.data.ChoiceList.default
+                ? val.data.ChoiceList.default
+                : 0,
+            };
+          } else {
+            return {
+              String: "INVALID_TYPE",
+            };
+          }
+        })();
+
+        this.confs.set(val.id, conf);
+      });
+    },
+
+    async start_device_init() {
+      const appStore = useAppStore();
+      this.conn_params = await appStore.controller.start_device_init(
+        this.device_name,
+        this.module_file[0]
+      );
+
+      // Prepare a container for connection configuration
+      this.conn_params.forEach((val) => {
+        let value: components["schemas"]["ConnParamValType"] = (() => {
+          switch (val.typ) {
+            case "Bool":
+              return {
+                Bool: false,
+              };
+            case "Int":
+              return {
+                Int: 0,
+              };
+            case "Float":
+              return {
+                Float: 0.0,
+              };
+            case "String":
+              return {
+                String: "text",
+              };
+          }
+        })();
+
+        this.connect_conf.push({
+          name: val.name,
+          value: value,
+        });
+      });
+    },
+
+    async connect_device() {
+      const appStore = useAppStore();
+
+      await appStore.controller.connect_device(this.connect_conf);
+      this.conf_info = await appStore.controller.obtain_device_conf_info();
+
+      this.assign_conf(this.conf_info);
+    },
+
+    async configure_device() {
+      const appStore = useAppStore();
+
+      let confs = new Array<components["schemas"]["DeviceConfEntry"]>();
+      for (const [id, conf] of this.confs) {
+        confs.push({
+          id: id,
+          data: conf,
+        });
+      }
+
+      await appStore.controller.configure_device(confs);
+    },
   },
 });

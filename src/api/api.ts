@@ -26,6 +26,16 @@ class Api {
     .path("/service/connect-device")
     .method("post")
     .create();
+
+  public readonly obtain_device_conf_info = this.fetcher
+    .path("/service/obtain-device-conf-info")
+    .method("post")
+    .create();
+
+  public readonly configure_device = this.fetcher
+    .path("/service/configure-device")
+    .method("post")
+    .create();
 }
 
 export default new Api();
