@@ -1,8 +1,43 @@
 import { paths, components } from "./contract";
 import { Fetcher } from "openapi-typescript-fetch";
+import {
+  ApiResponse,
+  CustomRequestInit,
+  Fetch,
+} from "openapi-typescript-fetch/dist/cjs/types";
+
+/** error logging middleware for testing purposes */
+async function error_handle_middleware(
+  url: string,
+  init: CustomRequestInit,
+  next: Fetch
+): Promise<ApiResponse> {
+  const res = await next(url, init).catch((reason) => {
+    console.log(init.body);
+    console.error(reason);
+  });
+
+  if (!res) {
+    throw "fetch failed";
+  }
+
+  if (!res.ok) {
+    console.error("[API] failed to fetch: url: %s; status: %d", url, res.status);
+    console.log(init.body);
+    console.log(res.data);
+  }
+
+  return res;
+}
 
 class Api {
   private fetcher = Fetcher.for<paths>();
+
+  constructor() {
+    this.fetcher.configure({
+      use: [error_handle_middleware],
+    });
+  }
 
   async start_device_init(
     name: string,

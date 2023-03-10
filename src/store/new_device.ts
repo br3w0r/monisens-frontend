@@ -1,9 +1,19 @@
 import { defineStore } from "pinia";
-import { components } from "../api/contract";
-import { useAppStore } from "./app";
+import Api from "@/api/api";
+import { components } from "@/api/contract";
+
+export enum DeviceInitState {
+  None,
+  Connect,
+  Configure,
+  Done,
+}
 
 export const useNewDeviceStore = defineStore("new_device", {
   state: () => ({
+    device_id: 0,
+    init_state: DeviceInitState.None,
+    is_idle: true,
     device_name: "",
     module_file: new Array<File>(),
     conn_params: new Array<components["schemas"]["ConnParamConf"]>(),
@@ -84,11 +94,14 @@ export const useNewDeviceStore = defineStore("new_device", {
     },
 
     async start_device_init() {
-      const appStore = useAppStore();
-      this.conn_params = await appStore.controller.start_device_init(
+      this.is_idle = false;
+
+      const res = await Api.start_device_init(
         this.device_name,
         this.module_file[0]
       );
+      this.device_id = res.device_id;
+      this.conn_params = res.conn_params;
 
       // Prepare a container for connection configuration
       this.conn_params.forEach((val) => {
@@ -118,19 +131,32 @@ export const useNewDeviceStore = defineStore("new_device", {
           value: value,
         });
       });
+
+      this.init_state = DeviceInitState.Connect;
+      this.is_idle = true;
     },
 
     async connect_device() {
-      const appStore = useAppStore();
+      this.is_idle = false;
 
-      await appStore.controller.connect_device(this.connect_conf);
-      this.conf_info = await appStore.controller.obtain_device_conf_info();
+      await Api.connect_device({
+        device_id: this.device_id,
+        connect_conf: this.connect_conf,
+      });
+
+      const res = await Api.obtain_device_conf_info({
+        device_id: this.device_id,
+      });
+      this.conf_info = res.data.device_conf_info;
 
       this.assign_conf(this.conf_info);
+
+      this.init_state = DeviceInitState.Configure;
+      this.is_idle = true;
     },
 
     async configure_device() {
-      const appStore = useAppStore();
+      this.is_idle = false;
 
       let confs = new Array<components["schemas"]["DeviceConfEntry"]>();
       for (const [id, conf] of this.confs) {
@@ -140,7 +166,13 @@ export const useNewDeviceStore = defineStore("new_device", {
         });
       }
 
-      await appStore.controller.configure_device(confs);
+      await Api.configure_device({
+        device_id: this.device_id,
+        confs: confs,
+      });
+
+      this.init_state = DeviceInitState.Done;
+      this.is_idle = true;
     },
   },
 });

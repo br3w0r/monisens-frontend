@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { useAppStore } from "../../store/app";
-import { useNewDeviceStore } from "../../store/new_device";
+import { useNewDeviceStore } from "@/store/new_device";
 
-const appStore = useAppStore();
 const newDeviceStore = useNewDeviceStore();
 </script>
 
 <template>
-  <VForm v-bind:disabled="!appStore.controller.is_idle">
+  <VForm v-bind:disabled="!newDeviceStore.is_idle">
     <VContainer>
       <h1>2. Connect to the device</h1>
       <div
@@ -46,9 +44,9 @@ const newDeviceStore = useNewDeviceStore();
       </div>
 
       <VBtn
-        :loading="!appStore.controller.is_idle"
+        :loading="!newDeviceStore.is_idle"
         :disabled="
-          !newDeviceStore.start_init_available || !appStore.controller.is_idle
+          !newDeviceStore.start_init_available || !newDeviceStore.is_idle
         "
         @click.stop="newDeviceStore.connect_device()"
         >Connect</VBtn
