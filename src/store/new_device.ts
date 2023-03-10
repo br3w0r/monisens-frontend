@@ -21,6 +21,7 @@ export const useNewDeviceStore = defineStore("new_device", {
       if (res) {
         return res;
       }
+      console.error("[conf_by_id]: config with id %d was not found", id);
       return {} as components["schemas"]["DeviceConfType"];
     },
 
