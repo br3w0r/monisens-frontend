@@ -55,8 +55,12 @@ export const useNewDeviceStore = defineStore("new_device", {
           } else if (val.data.IntRange) {
             return {
               IntRange: [
-                val.data.IntRange.def_from ? val.data.IntRange.def_from : 0,
-                val.data.IntRange.def_to ? val.data.IntRange.def_to : 10,
+                val.data.IntRange.def_from != undefined
+                  ? val.data.IntRange.def_from
+                  : val.data.IntRange.min,
+                val.data.IntRange.def_to
+                  ? val.data.IntRange.def_to
+                  : val.data.IntRange.max,
               ],
             };
           } else if (val.data.Float) {
@@ -66,10 +70,12 @@ export const useNewDeviceStore = defineStore("new_device", {
           } else if (val.data.FloatRange) {
             return {
               FloatRange: [
-                val.data.FloatRange.def_from
+                val.data.FloatRange.def_from != undefined
                   ? val.data.FloatRange.def_from
-                  : 0.0,
-                val.data.FloatRange.def_to ? val.data.FloatRange.def_to : 10.0,
+                  : val.data.FloatRange.min,
+                val.data.FloatRange.def_to
+                  ? val.data.FloatRange.def_to
+                  : val.data.FloatRange.max,
               ],
             };
           } else if (val.data.JSON) {

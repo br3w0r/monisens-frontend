@@ -1,6 +1,7 @@
 <script lang="ts">
 import { PropType } from "vue";
 import { components } from "../../api/contract";
+import RangePicker from "./RangePicker.vue";
 
 export default {
   name: "ConfigureSection",
@@ -34,6 +35,37 @@ const newDeviceStore = useNewDeviceStore();
       :label="ci.name"
       type="number"
       v-model.number="newDeviceStore.conf_by_id(ci.id).Int"
+    ></VTextField>
+
+    <RangePicker
+      v-else-if="ci.data.IntRange"
+      v-model="newDeviceStore.conf_by_id(ci.id).IntRange"
+      :label="ci.name"
+      :step="1"
+      :min="ci.data.IntRange.min"
+      :max="ci.data.IntRange.max"
+    ></RangePicker>
+
+    <VTextField
+      v-else-if="ci.data.Float"
+      :label="ci.name"
+      type="number"
+      v-model.number="newDeviceStore.conf_by_id(ci.id).Float"
+    ></VTextField>
+
+    <RangePicker
+      v-else-if="ci.data.FloatRange"
+      v-model="newDeviceStore.conf_by_id(ci.id).FloatRange"
+      :label="ci.name"
+      :step="0.001"
+      :min="ci.data.FloatRange.min"
+      :max="ci.data.FloatRange.max"
+    ></RangePicker>
+
+    <VTextField
+      v-if="ci.data.JSON"
+      :label="ci.name"
+      v-model="newDeviceStore.conf_by_id(ci.id).JSON"
     ></VTextField>
 
     <VRadioGroup
