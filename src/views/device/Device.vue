@@ -6,16 +6,21 @@ const appStore = useAppStore();
 </script>
 
 <template>
-  <VAppBar app elevation="1">
-    <VTabs>
-      <VTab prepend-icon="mdi-chart-box-outline" to="graphs">Graphs</VTab>
-      <VTab prepend-icon="mdi-camera-control" to="control">Control Panel</VTab>
-    </VTabs>
+  <div v-if="appStore.current_device">
+    <VAppBar app elevation="1">
+      <VTabs>
+        <VTab prepend-icon="mdi-chart-box-outline" to="graphs">Graphs</VTab>
+        <VTab prepend-icon="mdi-camera-control" to="control"
+          >Control Panel</VTab
+        >
+      </VTabs>
+    </VAppBar>
 
-    <template v-slot:append>
-      <!-- TODO -->
-    </template>
-  </VAppBar>
-
-  <RouterView />
+    <RouterView />
+  </div>
+  <div v-else>
+    <h1>
+      Device was not found :/
+    </h1>
+  </div>
 </template>

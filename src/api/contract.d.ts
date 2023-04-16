@@ -16,6 +16,12 @@ export interface paths {
   "/service/connect-device": {
     post: operations["connect_device"];
   };
+  "/service/get-device-list": {
+    post: operations["get_device_list"];
+  };
+  "/service/get-sensor-data": {
+    post: operations["get_sensor_data"];
+  };
   "/service/interrupt-device-init": {
     post: operations["interrupt_device_init"];
   };
@@ -171,6 +177,11 @@ export interface components {
       /** Format: int32 */
       ChoiceList: number;
     }]>;
+    DeviceEntry: {
+      /** Format: int32 */
+      id: number;
+      name: string;
+    };
     DeviceStartInitRequest: {
       /** Format: byte */
       device_name: string;
@@ -181,6 +192,24 @@ export interface components {
       conn_params: (components["schemas"]["ConnParamConf"])[];
       /** Format: int32 */
       device_id: number;
+    };
+    GetDeviceListResponse: {
+      result: (components["schemas"]["DeviceEntry"])[];
+    };
+    GetSensorDataRequest: {
+      /** Format: int32 */
+      device_id: number;
+      fields: (string)[];
+      from?: components["schemas"]["SensorData"];
+      /** Format: int32 */
+      limit?: number;
+      sensor: string;
+      sort: components["schemas"]["Sort"];
+    };
+    GetSensorDataResponse: {
+      result: ({
+          [key: string]: components["schemas"]["SensorData"] | undefined;
+        })[];
     };
     InterruptDeviceInitRequest: {
       /** Format: int32 */
@@ -193,6 +222,34 @@ export interface components {
     ObtainDeviceConfInfoResponse: {
       device_conf_info: (components["schemas"]["DeviceConfInfoEntry"])[];
     };
+    SensorData: OneOf<[{
+      /** Format: int32 */
+      Int16: number;
+    }, {
+      /** Format: int32 */
+      Int32: number;
+    }, {
+      /** Format: int64 */
+      Int64: number;
+    }, {
+      /** Format: float */
+      Float32: number;
+    }, {
+      /** Format: float */
+      Float64: number;
+    }, {
+      Timestamp: string;
+    }, {
+      String: string;
+    }, {
+      JSON: string;
+    }]>;
+    Sort: {
+      field: string;
+      order: components["schemas"]["SortOrder"];
+    };
+    /** @enum {string} */
+    SortOrder: "ASC" | "DESC";
     TestUploadForm: {
       /** Format: binary */
       file: string;
@@ -233,6 +290,35 @@ export interface operations {
     responses: {
       /** @description Ok response */
       200: never;
+      /** @description Server error response */
+      500: never;
+    };
+  };
+  get_device_list: {
+    responses: {
+      /** @description Ok response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GetDeviceListResponse"];
+        };
+      };
+      /** @description Server error response */
+      500: never;
+    };
+  };
+  get_sensor_data: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GetSensorDataRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GetSensorDataResponse"];
+        };
+      };
       /** @description Server error response */
       500: never;
     };

@@ -1,12 +1,31 @@
 <script setup lang="ts">
 import { RouterView } from "vue-router";
 import { useAppStore } from "./store/app";
+import DeviceList from "./views/DeviceList.vue";
 
 const appStore = useAppStore();
+
+// Init data
+appStore.init();
 </script>
 
 <template>
   <VApp>
+    <VDialog
+      v-model="appStore.is_busy"
+      fullscreen
+      persistent
+      :transition="false"
+      style="text-align: center"
+    >
+      <VCard color="white">
+        <VCardText>
+          <h2>Loading</h2>
+          <VProgressCircular indeterminate color="primary"></VProgressCircular>
+        </VCardText>
+      </VCard>
+    </VDialog>
+
     <VAppBar app elevation="1">
       <VAppBarNavIcon @click.stop="appStore.menu_toggle"></VAppBarNavIcon>
       <VTabs>
@@ -85,23 +104,7 @@ const appStore = useAppStore();
     </VFadeTransition>
 
     <VNavigationDrawer v-model="appStore.menu">
-      <VList>
-        <VListItem
-          link
-          prepend-icon="mdi-star"
-          title="Favourites"
-          to="/favourites"
-        />
-        <VListItem
-          link
-          prepend-icon="mdi-circle"
-          v-for="(device, index) in appStore.controller.device_list"
-          :key="index"
-          :title="device.name"
-          :to="'/device/' + index"
-          @click.stop="appStore.controller.device(index)"
-        />
-      </VList>
+      <DeviceList></DeviceList>
     </VNavigationDrawer>
 
     <VMain>

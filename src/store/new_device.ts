@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import Api from "@/api/api";
 import { components } from "@/api/contract";
+import { useAppStore } from "./app";
 
 export enum DeviceInitState {
   None,
@@ -178,6 +179,10 @@ export const useNewDeviceStore = defineStore("new_device", {
       });
 
       this.init_state = DeviceInitState.Done;
+
+      const appStore = useAppStore();
+      appStore.add_device(this.device_id, this.device_name);
+
       this.is_idle = true;
     },
   },
