@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { useAppStore } from "../../store/app";
+import { useAppStore } from "@/store/app";
+import NewMonitorPanel from "@/components/NewMonitorPanel.vue"
+
 import { Line } from "vue-chartjs";
 import {
   Chart as ChartJS,
@@ -35,7 +37,8 @@ const chartData = {
 </script>
 
 <template>
-  <div>Graphs for device "{{ appStore.current_device?.name }}"</div>
+  <!-- TODO -->
+  <!-- <Line :data="chartData" /> -->
 
-  <Line :data="chartData" />
+  <NewMonitorPanel></NewMonitorPanel>
 </template>

@@ -25,7 +25,7 @@ const routes = [
         children: [
           {
             path: "graphs",
-            component: () => import("@/views/device/GraphPanel.vue"),
+            component: () => import("@/views/device/MonitorPanel.vue"),
           },
           {
             path: "control",

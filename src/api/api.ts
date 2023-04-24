@@ -82,6 +82,16 @@ class Api {
     .path("/service/get-device-list")
     .method("post")
     .create();
+
+  public readonly get_device_sensor_info = this.fetcher
+    .path("/service/get-device-sensor-info")
+    .method("post")
+    .create();
+
+  public readonly get_sensor_data = this.fetcher
+    .path("/service/get-sensor-data")
+    .method("post")
+    .create();
 }
 
 export default new Api();

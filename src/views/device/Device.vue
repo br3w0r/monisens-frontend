@@ -9,7 +9,7 @@ const appStore = useAppStore();
   <div v-if="appStore.current_device">
     <VAppBar app elevation="1">
       <VTabs>
-        <VTab prepend-icon="mdi-chart-box-outline" to="graphs">Graphs</VTab>
+        <VTab prepend-icon="mdi-chart-box-outline" to="graphs">Monitoring</VTab>
         <VTab prepend-icon="mdi-camera-control" to="control"
           >Control Panel</VTab
         >

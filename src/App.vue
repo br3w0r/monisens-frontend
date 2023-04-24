@@ -2,6 +2,7 @@
 import { RouterView } from "vue-router";
 import { useAppStore } from "./store/app";
 import DeviceList from "./views/DeviceList.vue";
+import Loading from "@/components/common/Loading.vue";
 
 const appStore = useAppStore();
 
@@ -20,8 +21,7 @@ appStore.init();
     >
       <VCard color="white">
         <VCardText>
-          <h2>Loading</h2>
-          <VProgressCircular indeterminate color="primary"></VProgressCircular>
+          <Loading></Loading>
         </VCardText>
       </VCard>
     </VDialog>
@@ -29,7 +29,7 @@ appStore.init();
     <VAppBar app elevation="1">
       <VAppBarNavIcon @click.stop="appStore.menu_toggle"></VAppBarNavIcon>
       <VTabs>
-        <VTab to="/" prepend-icon="mdi-chart-box-outline">Monitoring</VTab>
+        <VTab to="/" prepend-icon="mdi-home">Home</VTab>
         <VTab to="/new-device" prepend-icon="mdi-plus">Add new device</VTab>
       </VTabs>
 

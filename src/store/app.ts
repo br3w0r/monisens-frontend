@@ -1,10 +1,15 @@
 import { defineStore } from "pinia";
 import Api from "@/api/api";
+import { components } from "@/api/contract";
 
 type Device = {
   id: number;
   name: string;
 };
+
+export enum MonitorViewType {
+  Log,
+}
 
 export const useAppStore = defineStore("app", {
   state: () => ({
@@ -15,6 +20,19 @@ export const useAppStore = defineStore("app", {
 
     _device_map: new Map<number, Device>(),
     _current_device: -1,
+
+    // variables for new monitoring panel creation
+    _new_device_dialog: false,
+    _device_sensor_info: [] as components["schemas"]["SensorInfo"][],
+    _device_sensor_info_loaded: false,
+    device_sensor_selected: {} as components["schemas"]["SensorInfo"],
+    _monitor_view_type_list: [
+      {
+        name: "Log",
+        type: MonitorViewType.Log,
+      },
+    ],
+    cur_monitor_view_type: MonitorViewType.Log,
   }),
   getters: {
     current_device: (state) => {
@@ -61,6 +79,29 @@ export const useAppStore = defineStore("app", {
       res.data.result.forEach((device) => {
         this.add_device(device.id, device.name);
       });
+    },
+
+    async start_add_new_panel() {
+      this._device_sensor_info_loaded = false;
+      this._new_device_dialog = true;
+
+      const res = await Api.get_device_sensor_info({
+        device_id: this._current_device,
+      });
+      this._device_sensor_info = res.data.device_sensor_info;
+
+      if (this._device_sensor_info.length > 0) {
+        this.device_sensor_selected = this._device_sensor_info[0];
+      } else {
+        this.device_sensor_selected.name = "[NO SENSORS]";
+      }
+
+      this._device_sensor_info_loaded = true;
+    },
+
+    cancel_add_new_panel() {
+      this._new_device_dialog = false;
+      this._device_sensor_info_loaded = false;
     },
   },
 });

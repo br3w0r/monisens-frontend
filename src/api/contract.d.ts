@@ -19,6 +19,9 @@ export interface paths {
   "/service/get-device-list": {
     post: operations["get_device_list"];
   };
+  "/service/get-device-sensor-info": {
+    post: operations["get_device_sensor_info"];
+  };
   "/service/get-sensor-data": {
     post: operations["get_sensor_data"];
   };
@@ -196,6 +199,13 @@ export interface components {
     GetDeviceListResponse: {
       result: (components["schemas"]["DeviceEntry"])[];
     };
+    GetDeviceSensorInfoRequest: {
+      /** Format: int32 */
+      device_id: number;
+    };
+    GetDeviceSensorInfoResponse: {
+      device_sensor_info: (components["schemas"]["SensorInfo"])[];
+    };
     GetSensorDataRequest: {
       /** Format: int32 */
       device_id: number;
@@ -244,6 +254,16 @@ export interface components {
     }, {
       JSON: string;
     }]>;
+    SensorDataInfo: {
+      name: string;
+      typ: components["schemas"]["SensorDataType"];
+    };
+    /** @enum {string} */
+    SensorDataType: "Int16" | "Int32" | "Int64" | "Float32" | "Float64" | "Timestamp" | "String" | "JSON";
+    SensorInfo: {
+      data: (components["schemas"]["SensorDataInfo"])[];
+      name: string;
+    };
     Sort: {
       field: string;
       order: components["schemas"]["SortOrder"];
@@ -300,6 +320,23 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["GetDeviceListResponse"];
+        };
+      };
+      /** @description Server error response */
+      500: never;
+    };
+  };
+  get_device_sensor_info: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GetDeviceSensorInfoRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok response with device conf info */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GetDeviceSensorInfoResponse"];
         };
       };
       /** @description Server error response */
