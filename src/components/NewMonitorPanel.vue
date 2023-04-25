@@ -5,7 +5,7 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { useAppStore, MonitorViewType } from "@/store/app";
+import { useAppStore } from "@/store/app";
 import LogSettings from "./monitoring_settings/LogSettings.vue";
 import Loading from "@/components/common/Loading.vue";
 
@@ -15,7 +15,7 @@ const appStore = useAppStore();
 <template>
   <div style="text-align: center">
     <VDialog
-      v-model="appStore._new_device_dialog"
+      v-model="appStore._new_monitor_panel_dialog"
       transition="v-fade-transition"
       persistent
     >
@@ -24,6 +24,7 @@ const appStore = useAppStore();
           prepend-icon="mdi-plus"
           color="primary"
           @click.stop="appStore.start_add_new_panel"
+          class="rounded-pill"
           >Add new panel</VBtn
         >
       </template>
@@ -48,7 +49,7 @@ const appStore = useAppStore();
               ></VSelect>
 
               <LogSettings
-                v-if="appStore.cur_monitor_view_type == MonitorViewType.Log"
+                v-if="appStore.cur_monitor_view_type == 'Log'"
                 :device_id="appStore._current_device"
                 :sensor_info="appStore.device_sensor_selected"
               ></LogSettings>
@@ -73,8 +74,8 @@ const appStore = useAppStore();
           </VRow>
         </VCardText>
         <VCardActions style="width: 100%; text-align: center">
-          <VBtn @click.stop="appStore.cancel_add_new_panel">Cancel</VBtn>
-          <VBtn color="primary">Save</VBtn>
+          <VBtn @click.stop="appStore.close_add_new_panel">Cancel</VBtn>
+          <VBtn color="primary" @click.stop="appStore.save_monitor_conf" :loading="appStore._is_saving_new_monitor_conf">Save</VBtn>
         </VCardActions>
       </VCard>
     </VDialog>

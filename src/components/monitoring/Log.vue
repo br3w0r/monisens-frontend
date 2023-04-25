@@ -2,7 +2,6 @@
 import { PropType } from "vue";
 import { components } from "@/api/contract";
 import Api from "@/api/api";
-import Loading from "../common/Loading.vue";
 
 export default {
   name: "Log",
@@ -84,14 +83,12 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { useAppStore } from "../../store/app";
-
-const appStore = useAppStore();
+import Loading from "../common/Loading.vue";
 </script>
 
 <template>
   <VCard height="300px">
-    <VTable height="300px" v-if="ready">
+    <VTable height="300px" v-if="ready" fixed-header>
       <thead>
         <tr>
           <th v-for="(field, index) in fields" :key="index">
@@ -102,9 +99,7 @@ const appStore = useAppStore();
       <tbody>
         <tr v-for="(data, index) in log_data" :key="index">
           <td v-for="(field, index) in fields" :key="index">
-            {{
-              data[field] ? Object.values(data[field] as Object)[0] : ""
-            }}
+            {{ data[field] ? Object.values(data[field] as Object)[0] : "" }}
           </td>
         </tr>
       </tbody>

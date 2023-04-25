@@ -1,7 +1,8 @@
 <script lang="ts">
 import { PropType } from "vue";
 import { components } from "@/api/contract";
-import Log from "../monitoring/Log.vue";
+import { mapStores } from 'pinia'
+import { useAppStore } from "@/store/app";
 
 export default {
   name: "LogSettings",
@@ -17,20 +18,30 @@ export default {
   },
   watch: {
     sensor_info(newInfo) {
-      this.fields = [newInfo.data[0].name];
-      this.sort_field = newInfo.data[0].name;
-    }
+      // in case of sensor change
+      this.appStore.cur_monitor_config.Log.fields = [newInfo.data[0].name];
+      this.appStore.cur_monitor_config.Log.sort_field = newInfo.data[0].name;
+    },
+  },
+  computed: {
+    ...mapStores(useAppStore),
   },
   data() {
     return {
-      fields: [this.sensor_info.data[0].name],
-      sort_field: this.sensor_info.data[0].name,
-      sort_direction: "ASC" as components["schemas"]["SortOrder"],
       sort_direction_list: [
         "ASC",
         "DESC",
       ] as components["schemas"]["SortOrder"][],
-      limit: 3,
+    };
+  },
+  created() {
+    this.appStore.cur_monitor_config = {
+      Log: {
+        fields: [this.sensor_info.data[0].name],
+        limit: 3,
+        sort_direction: "ASC",
+        sort_field: this.sensor_info.data[0].name,
+      },
     };
   },
   methods: {
@@ -48,19 +59,17 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { useAppStore } from "../../store/app";
-
-const appStore = useAppStore();
+import Log from "../monitoring/Log.vue";
 </script>
 
 <template>
   <Log
     :device_id="device_id"
     :sensor_name="sensor_info.name"
-    :fields="fields"
-    :sort_field="sort_field"
-    :sort_direction="sort_direction"
-    :limit="limit"
+    :fields="appStore.cur_monitor_config.Log.fields"
+    :sort_field="appStore.cur_monitor_config.Log.sort_field"
+    :sort_direction="appStore.cur_monitor_config.Log.sort_direction"
+    :limit="appStore.cur_monitor_config.Log.limit"
   ></Log>
 
   <br />
@@ -68,7 +77,7 @@ const appStore = useAppStore();
   <h3>Fields</h3>
   <VSelect
     label="Fields"
-    v-model="fields"
+    v-model="appStore.cur_monitor_config.Log.fields"
     item-value="name"
     item-title="name"
     :items="sensor_info.data"
@@ -77,12 +86,16 @@ const appStore = useAppStore();
   ></VSelect>
 
   <h3>Limit</h3>
-  <VTextField label="Limit" type="number" v-model.number="limit"></VTextField>
+  <VTextField
+    label="Limit"
+    type="number"
+    v-model.number="appStore.cur_monitor_config.Log.limit"
+  ></VTextField>
 
   <h3>Sort Field</h3>
   <VSelect
     label="Sort Field"
-    v-model="sort_field"
+    v-model="appStore.cur_monitor_config.Log.sort_field"
     item-value="name"
     item-title="name"
     :items="sensor_info.data"
@@ -93,7 +106,7 @@ const appStore = useAppStore();
   <h3>Sort Direction</h3>
   <VSelect
     label="Sort Direction"
-    v-model="sort_direction"
+    v-model="appStore.cur_monitor_config.Log.sort_direction"
     :items="sort_direction_list"
     chips
   ></VSelect>

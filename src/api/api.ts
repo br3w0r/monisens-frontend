@@ -6,8 +6,8 @@ import {
   Fetch,
 } from "openapi-typescript-fetch/dist/cjs/types";
 
-// const BASE_URL = "http://127.0.0.1:8080";
-const BASE_URL = "https://f9b76dca-db1c-45f8-8fe0-14d822d9d3df.mock.pstmn.io";
+const BASE_URL = "http://127.0.0.1:8080";
+// const BASE_URL = "https://f9b76dca-db1c-45f8-8fe0-14d822d9d3df.mock.pstmn.io";
 
 /** error logging middleware for testing purposes */
 async function error_handle_middleware(
@@ -90,6 +90,16 @@ class Api {
 
   public readonly get_sensor_data = this.fetcher
     .path("/service/get-sensor-data")
+    .method("post")
+    .create();
+
+  public readonly save_monitor_conf = this.fetcher
+    .path("/service/save-monitor-conf")
+    .method("post")
+    .create();
+
+  public readonly get_monitor_conf_list = this.fetcher
+    .path("/service/get-monitor-conf-list")
     .method("post")
     .create();
 }

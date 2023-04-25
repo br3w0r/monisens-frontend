@@ -22,6 +22,9 @@ export interface paths {
   "/service/get-device-sensor-info": {
     post: operations["get_device_sensor_info"];
   };
+  "/service/get-monitor-conf-list": {
+    post: operations["get_monitor_conf_list"];
+  };
   "/service/get-sensor-data": {
     post: operations["get_sensor_data"];
   };
@@ -30,6 +33,9 @@ export interface paths {
   };
   "/service/obtain-device-conf-info": {
     post: operations["obtain_device_conf_info"];
+  };
+  "/service/save-monitor-conf": {
+    post: operations["save_monitor_conf"];
   };
   "/service/start-device-init": {
     post: operations["start_device_init"];
@@ -225,12 +231,54 @@ export interface components {
       /** Format: int32 */
       device_id: number;
     };
+    MonitorConfListEntry: {
+      config: components["schemas"]["MonitorTypeConf"];
+      /** Format: int32 */
+      device_id: number;
+      /** Format: int32 */
+      id: number;
+      sensor: string;
+      typ: components["schemas"]["MonitorType"];
+    };
+    MonitorConfListFilter: {
+      /** Format: int32 */
+      device_id: number;
+    };
+    MonitorConfListRequest: {
+      filter: components["schemas"]["MonitorConfListFilter"];
+    };
+    MonitorConfListResponse: {
+      result: (components["schemas"]["MonitorConfListEntry"])[];
+    };
+    MonitorLogConf: {
+      fields: (string)[];
+      /** Format: int32 */
+      limit: number;
+      sort_direction: components["schemas"]["SortDir"];
+      sort_field: string;
+    };
+    /** @enum {string} */
+    MonitorType: "Log";
+    MonitorTypeConf: {
+      Log: components["schemas"]["MonitorLogConf"];
+    };
     ObtainDeviceConfInfoRequest: {
       /** Format: int32 */
       device_id: number;
     };
     ObtainDeviceConfInfoResponse: {
       device_conf_info: (components["schemas"]["DeviceConfInfoEntry"])[];
+    };
+    SaveMonitorConfRequest: {
+      config: components["schemas"]["MonitorTypeConf"];
+      /** Format: int32 */
+      device_id: number;
+      sensor: string;
+      typ: components["schemas"]["MonitorType"];
+    };
+    SaveMonitorConfResponse: {
+      /** Format: int32 */
+      id: number;
     };
     SensorData: OneOf<[{
       /** Format: int32 */
@@ -268,6 +316,8 @@ export interface components {
       field: string;
       order: components["schemas"]["SortOrder"];
     };
+    /** @enum {string} */
+    SortDir: "ASC" | "DESC";
     /** @enum {string} */
     SortOrder: "ASC" | "DESC";
     TestUploadForm: {
@@ -343,6 +393,23 @@ export interface operations {
       500: never;
     };
   };
+  get_monitor_conf_list: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MonitorConfListRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["MonitorConfListResponse"];
+        };
+      };
+      /** @description Server error response */
+      500: never;
+    };
+  };
   get_sensor_data: {
     requestBody: {
       content: {
@@ -384,6 +451,23 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ObtainDeviceConfInfoResponse"];
+        };
+      };
+      /** @description Server error response */
+      500: never;
+    };
+  };
+  save_monitor_conf: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SaveMonitorConfRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SaveMonitorConfResponse"];
         };
       };
       /** @description Server error response */

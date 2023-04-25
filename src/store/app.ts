@@ -7,10 +7,6 @@ type Device = {
   name: string;
 };
 
-export enum MonitorViewType {
-  Log,
-}
-
 export const useAppStore = defineStore("app", {
   state: () => ({
     is_idle: true,
@@ -22,17 +18,23 @@ export const useAppStore = defineStore("app", {
     _current_device: -1,
 
     // variables for new monitoring panel creation
-    _new_device_dialog: false,
+    _new_monitor_panel_dialog: false,
     _device_sensor_info: [] as components["schemas"]["SensorInfo"][],
     _device_sensor_info_loaded: false,
     device_sensor_selected: {} as components["schemas"]["SensorInfo"],
     _monitor_view_type_list: [
       {
         name: "Log",
-        type: MonitorViewType.Log,
+        type: "Log" as components["schemas"]["MonitorType"],
       },
     ],
-    cur_monitor_view_type: MonitorViewType.Log,
+    cur_monitor_view_type: "Log" as components["schemas"]["MonitorType"],
+    cur_monitor_config: {} as components["schemas"]["MonitorTypeConf"],
+    _is_saving_new_monitor_conf: false,
+
+    // variables for mointoring panels
+    _cur_monitoring_confs:
+      [] as components["schemas"]["MonitorConfListEntry"][],
   }),
   getters: {
     current_device: (state) => {
@@ -62,8 +64,16 @@ export const useAppStore = defineStore("app", {
       });
     },
 
-    set_current_device(id: number) {
+    async set_current_device(id: number) {
       this._current_device = id;
+
+      const res = await Api.get_monitor_conf_list({
+        filter: {
+          device_id: id,
+        },
+      });
+
+      this._cur_monitoring_confs = res.data.result;
     },
 
     async init() {
@@ -83,7 +93,7 @@ export const useAppStore = defineStore("app", {
 
     async start_add_new_panel() {
       this._device_sensor_info_loaded = false;
-      this._new_device_dialog = true;
+      this._new_monitor_panel_dialog = true;
 
       const res = await Api.get_device_sensor_info({
         device_id: this._current_device,
@@ -99,9 +109,31 @@ export const useAppStore = defineStore("app", {
       this._device_sensor_info_loaded = true;
     },
 
-    cancel_add_new_panel() {
-      this._new_device_dialog = false;
+    close_add_new_panel() {
+      this._new_monitor_panel_dialog = false;
       this._device_sensor_info_loaded = false;
+    },
+
+    async save_monitor_conf() {
+      this._is_saving_new_monitor_conf = true;
+
+      const res = await Api.save_monitor_conf({
+        device_id: this._current_device,
+        sensor: this.device_sensor_selected.name,
+        typ: this.cur_monitor_view_type,
+        config: this.cur_monitor_config,
+      });
+
+      this._cur_monitoring_confs.push({
+        id: res.data.id,
+        config: this.cur_monitor_config,
+        device_id: this._current_device,
+        sensor: this.device_sensor_selected.name,
+        typ: this.cur_monitor_view_type,
+      });
+
+      this.close_add_new_panel();
+      this._is_saving_new_monitor_conf = false;
     },
   },
 });
