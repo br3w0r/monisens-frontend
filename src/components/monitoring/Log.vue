@@ -3,6 +3,9 @@ import { PropType } from "vue";
 import { components } from "@/api/contract";
 import Api from "@/api/api";
 
+const UPDATE_TIMEOUT = 500;
+const SYNC_INTERVAL = 5000;
+
 export default {
   name: "Log",
   props: {
@@ -34,7 +37,7 @@ export default {
   watch: {
     $props: {
       handler() {
-        this.get_data();
+        this.init();
       },
       deep: true,
     },
@@ -49,34 +52,42 @@ export default {
         [key: string]: components["schemas"]["SensorData"] | undefined;
       }[],
       update_timeout: undefined as ReturnType<typeof setTimeout> | undefined,
+      sync_interval: undefined as ReturnType<typeof setInterval> | undefined,
     };
   },
   methods: {
-    get_data() {
+    init() {
       if (this.update_timeout) {
         clearTimeout(this.update_timeout);
       }
 
-      this.update_timeout = setTimeout(() => {
-        this.ready = false;
-        Api.get_sensor_data({
-          device_id: this.device_id,
-          fields: this.fields,
-          sensor: this.sensor_name,
-          sort: {
-            field: this.sort_field,
-            order: this.sort_direction,
-          },
-          limit: this.limit,
-        }).then((res) => {
-          this.log_data = res.data.result;
-          this.ready = true;
-        });
-      }, 500);
+      if (this.sync_interval) {
+        clearInterval(this.sync_interval);
+      }
+
+      this.update_timeout = setTimeout(this.update, UPDATE_TIMEOUT);
+      this.sync_interval = setInterval(this.update, SYNC_INTERVAL);
+    },
+
+    update() {
+      this.ready = false;
+      Api.get_sensor_data({
+        device_id: this.device_id,
+        fields: this.fields,
+        sensor: this.sensor_name,
+        sort: {
+          field: this.sort_field,
+          order: this.sort_direction,
+        },
+        limit: this.limit,
+      }).then((res) => {
+        this.log_data = res.data.result;
+        this.ready = true;
+      });
     },
   },
   async mounted() {
-    await this.get_data();
+    await this.init();
     this.ready = true;
   },
 };
