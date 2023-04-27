@@ -16,7 +16,6 @@ const appStore = useAppStore();
   <div style="text-align: center">
     <VDialog
       v-model="appStore._new_monitor_panel_dialog"
-      transition="v-fade-transition"
       persistent
     >
       <template v-slot:activator="{ props }">

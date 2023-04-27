@@ -111,7 +111,6 @@ export const useAppStore = defineStore("app", {
 
     close_add_new_panel() {
       this._new_monitor_panel_dialog = false;
-      this._device_sensor_info_loaded = false;
     },
 
     async save_monitor_conf() {
