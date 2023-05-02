@@ -56,11 +56,12 @@ export interface components {
       value: components["schemas"]["ConnParamValType"];
     };
     ConnParamConf: {
+      info?: components["schemas"]["ConnParamEntryInfo"];
       name: string;
       typ: components["schemas"]["ConnParamType"];
     };
     /** @enum {string} */
-    ConnParamType: "Bool" | "Int" | "Float" | "String";
+    ConnParamType: "Bool" | "Int" | "Float" | "String" | "ChoiceList";
     ConnParamValType: OneOf<[{
       Bool: boolean;
     }, {

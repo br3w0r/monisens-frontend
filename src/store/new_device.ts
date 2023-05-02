@@ -130,6 +130,10 @@ export const useNewDeviceStore = defineStore("new_device", {
               return {
                 String: "text",
               };
+            case "ChoiceList":
+              return {
+                Int: 0,
+              };
           }
         })();
 

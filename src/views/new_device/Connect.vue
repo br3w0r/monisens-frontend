@@ -41,6 +41,20 @@ const newDeviceStore = useNewDeviceStore();
           :label="conn_param.name"
           v-model="newDeviceStore.connect_conf[index].value.String"
         ></VTextField>
+
+        <!-- ChoiceList -->
+        <VRadioGroup
+          v-else-if="conn_param.typ == 'ChoiceList'"
+          v-model.number="newDeviceStore.connect_conf[index].value.Int"
+        >
+          <p>{{ conn_param.name }}</p>
+          <VRadio
+            v-for="(choice, index) in conn_param.info!.ChoiceList.choices"
+            :key="index"
+            :label="choice"
+            :value="index"
+          ></VRadio>
+        </VRadioGroup>
       </div>
 
       <VBtn
