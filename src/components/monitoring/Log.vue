@@ -4,7 +4,6 @@ import { components } from "@/api/contract";
 import Api from "@/api/api";
 
 const UPDATE_TIMEOUT = 500;
-const SYNC_INTERVAL = 5000;
 
 export default {
   name: "Log",
@@ -37,12 +36,15 @@ export default {
   watch: {
     $props: {
       handler() {
-        this.init();
+        this.update_with_timeout();
       },
       deep: true,
     },
     sensor_info() {
       this.log_data = [];
+    },
+    "conf.sync_interval.selected"(newVal: number) {
+      this.set_sync_interval(newVal);
     },
   },
   data() {
@@ -53,20 +55,70 @@ export default {
       }[],
       update_timeout: undefined as ReturnType<typeof setTimeout> | undefined,
       sync_interval: undefined as ReturnType<typeof setInterval> | undefined,
+      conf: {
+        sync_interval: {
+          selected: {
+            name: "5s",
+            value: 5000,
+          },
+          variants: [
+            {
+              name: "0.5s",
+              value: 500,
+            },
+            {
+              name: "1s",
+              value: 1000,
+            },
+            {
+              name: "3s",
+              value: 3000,
+            },
+            {
+              name: "5s",
+              value: 5000,
+            },
+            {
+              name: "10s",
+              value: 10000,
+            },
+            {
+              name: "1m",
+              value: 60000,
+            },
+            {
+              name: "5m",
+              value: 300000,
+            },
+            {
+              name: "10m",
+              value: 600000,
+            },
+          ],
+        },
+        show_loading: true,
+      },
     };
   },
   methods: {
     init() {
+      this.update();
+      this.set_sync_interval(this.conf.sync_interval.selected.value);
+    },
+
+    update_with_timeout() {
       if (this.update_timeout) {
         clearTimeout(this.update_timeout);
       }
 
+      this.update_timeout = setTimeout(this.update, UPDATE_TIMEOUT);
+    },
+
+    set_sync_interval(sync_interval: number) {
       if (this.sync_interval) {
         clearInterval(this.sync_interval);
       }
-
-      this.update_timeout = setTimeout(this.update, UPDATE_TIMEOUT);
-      this.sync_interval = setInterval(this.update, SYNC_INTERVAL);
+      this.sync_interval = setInterval(this.update, sync_interval);
     },
 
     update() {
@@ -98,24 +150,42 @@ import Loading from "../common/Loading.vue";
 </script>
 
 <template>
-  <VCard height="300px">
-    <VTable height="300px" v-if="ready" fixed-header>
-      <thead>
-        <tr>
-          <th v-for="(field, index) in fields" :key="index">
-            {{ field }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(data, index) in log_data" :key="index">
-          <td v-for="(field, index) in fields" :key="index">
-            {{ data[field] ? Object.values(data[field] as Object)[0] : "" }}
-          </td>
-        </tr>
-      </tbody>
-    </VTable>
+  <VCard >
+    <VRow style="height: 50px">
+      <VCol>
+        <VSelect
+          density="compact"
+          label="Update interval"
+          v-model="conf.sync_interval.selected"
+          item-title="name"
+          :items="conf.sync_interval.variants"
+        ></VSelect>
+      </VCol>
+      <VCol>
+        <VCheckbox label="Show loading screen" v-model="conf.show_loading"></VCheckbox>
+      </VCol>
+    </VRow>
+    <VRow>
+      <VCol>
+        <VTable height="400px" v-if="ready || !conf.show_loading" fixed-header>
+          <thead>
+            <tr>
+              <th v-for="(field, index) in fields" :key="index">
+                {{ field }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(data, index) in log_data" :key="index">
+              <td v-for="(field, index) in fields" :key="index">
+                {{ data[field] ? Object.values(data[field] as Object)[0] : "" }}
+              </td>
+            </tr>
+          </tbody>
+        </VTable>
 
-    <Loading v-else></Loading>
+        <Loading style="height:400px" v-else-if="conf.show_loading"></Loading>
+      </VCol>
+    </VRow>
   </VCard>
 </template>
