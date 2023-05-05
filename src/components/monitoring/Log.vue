@@ -40,10 +40,12 @@ export default {
       },
       deep: true,
     },
-    sensor_info() {
+    sensor_name() {
       this.log_data = [];
+      this.conf.sync_interval.selected = this.conf.sync_interval.default;
+      this.conf.show_loading = true;
     },
-    "conf.sync_interval.selected"(newVal: number) {
+    "conf.sync_interval.selected"(newVal) {
       this.set_sync_interval(newVal);
     },
   },
@@ -57,10 +59,8 @@ export default {
       sync_interval: undefined as ReturnType<typeof setInterval> | undefined,
       conf: {
         sync_interval: {
-          selected: {
-            name: "5s",
-            value: 5000,
-          },
+          selected: 5000,
+          default: 5000,
           variants: [
             {
               name: "0.5s",
@@ -103,7 +103,7 @@ export default {
   methods: {
     init() {
       this.update();
-      this.set_sync_interval(this.conf.sync_interval.selected.value);
+      this.set_sync_interval(this.conf.sync_interval.selected);
     },
 
     update_with_timeout() {
@@ -150,7 +150,7 @@ import Loading from "../common/Loading.vue";
 </script>
 
 <template>
-  <VCard >
+  <VCard>
     <VRow style="height: 50px">
       <VCol>
         <VSelect
@@ -162,7 +162,10 @@ import Loading from "../common/Loading.vue";
         ></VSelect>
       </VCol>
       <VCol>
-        <VCheckbox label="Show loading screen" v-model="conf.show_loading"></VCheckbox>
+        <VCheckbox
+          label="Show loading screen"
+          v-model="conf.show_loading"
+        ></VCheckbox>
       </VCol>
     </VRow>
     <VRow>
@@ -184,7 +187,7 @@ import Loading from "../common/Loading.vue";
           </tbody>
         </VTable>
 
-        <Loading style="height:400px" v-else-if="conf.show_loading"></Loading>
+        <Loading style="height: 400px" v-else-if="conf.show_loading"></Loading>
       </VCol>
     </VRow>
   </VCard>
