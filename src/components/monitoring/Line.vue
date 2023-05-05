@@ -178,31 +178,29 @@ export default {
 
       Api.get_sensor_data(req).then((res) => {
         if (this.log_data.length > 0) {
-          if (res.data.result.length == 0) {
-            return;
-          }
-
-          let array_len = this.log_data.length + res.data.result.length;
-          if (array_len > this.limit) {
-            array_len = this.limit;
-          }
-
-          let i = 0;
-          let new_log_data = Array<(typeof res.data.result)[0]>(array_len);
-
-          for (; i < res.data.result.length; i++) {
-            new_log_data[i] = res.data.result[i];
-          }
-
-          for (let j = 0; j < this.log_data.length; j++) {
-            if (i + j >= this.limit) {
-              break;
+          if (res.data.result.length > 0) {
+            let array_len = this.log_data.length + res.data.result.length;
+            if (array_len > this.limit) {
+              array_len = this.limit;
             }
 
-            new_log_data[i + j] = this.log_data[j];
-          }
+            let i = 0;
+            let new_log_data = Array<(typeof res.data.result)[0]>(array_len);
 
-          this.log_data = new_log_data;
+            for (; i < res.data.result.length; i++) {
+              new_log_data[i] = res.data.result[i];
+            }
+
+            for (let j = 0; j < this.log_data.length; j++) {
+              if (i + j >= this.limit) {
+                break;
+              }
+
+              new_log_data[i + j] = this.log_data[j];
+            }
+
+            this.log_data = new_log_data;
+          }
         } else {
           this.log_data = res.data.result;
         }
