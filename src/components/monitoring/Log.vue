@@ -36,6 +36,7 @@ export default {
   watch: {
     $props: {
       handler() {
+        this.log_data = [];
         this.update_with_timeout();
       },
       deep: true,
@@ -123,7 +124,8 @@ export default {
 
     update() {
       this.ready = false;
-      Api.get_sensor_data({
+
+      let req: components["schemas"]["GetSensorDataRequest"] = {
         device_id: this.device_id,
         fields: this.fields,
         sensor: this.sensor_name,
@@ -131,9 +133,21 @@ export default {
           field: this.sort_field,
           order: this.sort_direction,
         },
-        limit: this.limit,
-      }).then((res) => {
-        this.log_data = res.data.result;
+      };
+
+      if (this.log_data.length > 0) {
+        req.from = this.log_data[0][this.sort_field];
+      }
+
+      req.limit = this.limit;
+
+      Api.get_sensor_data(req).then((res) => {
+        if (this.log_data.length > 0) {
+          this.log_data.unshift(...res.data.result);
+          this.log_data = this.log_data.slice(0, this.limit);
+        } else {
+          this.log_data = res.data.result;
+        }
         this.ready = true;
       });
     },
@@ -141,6 +155,16 @@ export default {
   async mounted() {
     await this.init();
     this.ready = true;
+  },
+  unmounted() {
+    // Clear intervals and timeouts on unload
+    if (this.sync_interval) {
+      clearInterval(this.sync_interval);
+    }
+
+    if (this.update_timeout) {
+      clearTimeout(this.update_timeout);
+    }
   },
 };
 </script>
