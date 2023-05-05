@@ -7,6 +7,7 @@ export default {
 <script setup lang="ts">
 import { useAppStore } from "@/store/app";
 import LogSettings from "./monitoring_settings/LogSettings.vue";
+import LineSettings from "./monitoring_settings/LineSettings.vue";
 import Loading from "@/components/common/Loading.vue";
 
 const appStore = useAppStore();
@@ -14,10 +15,7 @@ const appStore = useAppStore();
 
 <template>
   <div style="text-align: center">
-    <VDialog
-      v-model="appStore._new_monitor_panel_dialog"
-      persistent
-    >
+    <VDialog v-model="appStore._new_monitor_panel_dialog" persistent>
       <template v-slot:activator="{ props }">
         <VBtn
           prepend-icon="mdi-plus"
@@ -47,11 +45,19 @@ const appStore = useAppStore();
                 return-object
               ></VSelect>
 
+              <!-- Log -->
               <LogSettings
                 v-if="appStore.cur_monitor_view_type == 'Log'"
                 :device_id="appStore._current_device"
                 :sensor_info="appStore.device_sensor_selected"
               ></LogSettings>
+
+              <!-- Line -->
+              <LineSettings
+                v-else-if="appStore.cur_monitor_view_type == 'Line'"
+                :device_id="appStore._current_device"
+                :sensor_info="appStore.device_sensor_selected"
+              ></LineSettings>
             </VCol>
 
             <VCol cols="2">
@@ -74,7 +80,12 @@ const appStore = useAppStore();
         </VCardText>
         <VCardActions style="width: 100%; text-align: center">
           <VBtn @click.stop="appStore.close_add_new_panel">Cancel</VBtn>
-          <VBtn color="primary" @click.stop="appStore.save_monitor_conf" :loading="appStore._is_saving_new_monitor_conf">Save</VBtn>
+          <VBtn
+            color="primary"
+            @click.stop="appStore.save_monitor_conf"
+            :loading="appStore._is_saving_new_monitor_conf"
+            >Save</VBtn
+          >
         </VCardActions>
       </VCard>
     </VDialog>

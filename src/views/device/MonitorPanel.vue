@@ -2,39 +2,9 @@
 import { useAppStore } from "@/store/app";
 import NewMonitorPanel from "@/components/NewMonitorPanel.vue";
 import Log from "@/components/monitoring/Log.vue";
-
-import { Line } from "vue-chartjs";
-import {
-  Chart as ChartJS,
-  Title,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-} from "chart.js";
-
-ChartJS.register(
-  Title,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement
-);
+import Line from "@/components/monitoring/Line.vue";
 
 const appStore = useAppStore();
-const chartData = {
-  labels: ["January", "February", "March"],
-  datasets: [
-    {
-      data: [40, 20, 12],
-      borderColor: "#0356fc",
-    },
-  ],
-};
 </script>
 
 <template>
@@ -62,5 +32,13 @@ const chartData = {
       :sort_direction="monitor_conf.config.Log!.sort_direction"
       :limit="monitor_conf.config.Log!.limit"
     ></Log>
+    <Line
+      v-else-if="monitor_conf.typ == 'Line'"
+      :device_id="monitor_conf.device_id"
+      :sensor_name="monitor_conf.sensor"
+      :x_field="monitor_conf.config.Line!.x_field"
+      :y_field="monitor_conf.config.Line!.y_field"
+      :limit="monitor_conf.config.Line!.limit"
+    ></Line>
   </div>
 </template>

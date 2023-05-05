@@ -257,6 +257,12 @@ export interface components {
     MonitorConfListResponse: {
       result: (components["schemas"]["MonitorConfListEntry"])[];
     };
+    MonitorLineConf: {
+      /** Format: int32 */
+      limit: number;
+      x_field: string;
+      y_field: string;
+    };
     MonitorLogConf: {
       fields: (string)[];
       /** Format: int32 */
@@ -265,10 +271,12 @@ export interface components {
       sort_field: string;
     };
     /** @enum {string} */
-    MonitorType: "Log";
-    MonitorTypeConf: {
+    MonitorType: "Log" | "Line";
+    MonitorTypeConf: OneOf<[{
       Log: components["schemas"]["MonitorLogConf"];
-    };
+    }, {
+      Line: components["schemas"]["MonitorLineConf"];
+    }]>;
     ObtainDeviceConfInfoRequest: {
       /** Format: int32 */
       device_id: number;

@@ -6,7 +6,7 @@ import Api from "@/api/api";
 const UPDATE_TIMEOUT = 500;
 
 export default {
-  name: "Log",
+  name: "Line",
   props: {
     device_id: {
       type: Number,
@@ -16,16 +16,12 @@ export default {
       type: String,
       required: true,
     },
-    fields: {
-      type: Array as PropType<string[]>,
-      required: true,
-    },
-    sort_field: {
+    x_field: {
       type: String,
       required: true,
     },
-    sort_direction: {
-      type: String as PropType<components["schemas"]["SortOrder"]>,
+    y_field: {
+      type: String,
       required: true,
     },
     limit: {
@@ -44,7 +40,6 @@ export default {
     sensor_name() {
       this.log_data = [];
       this.conf.sync_interval.selected = this.conf.sync_interval.default;
-      this.conf.show_loading = true;
     },
     "conf.sync_interval.selected"(newVal) {
       this.set_sync_interval(newVal);
@@ -97,9 +92,50 @@ export default {
             },
           ],
         },
-        show_loading: true,
+      },
+      chart_options: {
+        animation: false,
+        scales: {
+          y: {
+            title: {
+              display: true,
+              text: this.y_field,
+            },
+          },
+          x: {
+            title: {
+              display: true,
+              text: this.x_field,
+            },
+          },
+        },
       },
     };
+  },
+  computed: {
+    chartData() {
+      let log_data_reversed: typeof this.log_data = [];
+      if (this.log_data.length > 0) {
+        log_data_reversed = [...this.log_data].reverse();
+      }
+
+      return {
+        labels: log_data_reversed.map((val) =>
+          val[this.x_field] ? Object.values(val[this.x_field] as Object)[0] : ""
+        ),
+        datasets: [
+          {
+            data: log_data_reversed.map((val) =>
+              val[this.y_field]
+                ? Object.values(val[this.y_field] as Object)[0]
+                : ""
+            ),
+            borderColor: "#0356fc",
+            label: this.y_field,
+          },
+        ],
+      };
+    },
   },
   methods: {
     init() {
@@ -127,17 +163,17 @@ export default {
 
       let req: components["schemas"]["GetSensorDataRequest"] = {
         device_id: this.device_id,
-        fields: this.fields,
+        fields: [this.x_field, this.y_field],
         sensor: this.sensor_name,
         sort: {
-          field: this.sort_field,
-          order: this.sort_direction,
+          field: this.x_field,
+          order: "DESC",
         },
         limit: this.limit,
       };
 
       if (this.log_data.length > 0) {
-        req.from = this.log_data[0][this.sort_field];
+        req.from = this.log_data[0][this.x_field];
       }
 
       Api.get_sensor_data(req).then((res) => {
@@ -193,6 +229,27 @@ export default {
 
 <script setup lang="ts">
 import Loading from "../common/Loading.vue";
+import { Line } from "vue-chartjs";
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+} from "chart.js";
+
+ChartJS.register(
+  Title,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement
+);
 </script>
 
 <template>
@@ -207,33 +264,15 @@ import Loading from "../common/Loading.vue";
           :items="conf.sync_interval.variants"
         ></VSelect>
       </VCol>
-      <VCol>
-        <VCheckbox
-          label="Show loading screen"
-          v-model="conf.show_loading"
-        ></VCheckbox>
-      </VCol>
     </VRow>
     <VRow>
       <VCol>
-        <VTable height="400px" v-if="ready || !conf.show_loading" fixed-header>
-          <thead>
-            <tr>
-              <th v-for="(field, index) in fields" :key="index">
-                {{ field }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(data, index) in log_data" :key="index">
-              <td v-for="(field, index) in fields" :key="index">
-                {{ data[field] ? Object.values(data[field] as Object)[0] : "" }}
-              </td>
-            </tr>
-          </tbody>
-        </VTable>
-
-        <Loading style="height: 400px" v-else-if="conf.show_loading"></Loading>
+        <Line
+          v-if="ready || log_data.length > 0"
+          :data="chartData"
+          :options="chart_options"
+        ></Line>
+        <Loading style="height: 400px" v-else></Loading>
       </VCol>
     </VRow>
   </VCard>

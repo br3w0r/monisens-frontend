@@ -27,6 +27,10 @@ export const useAppStore = defineStore("app", {
         name: "Log",
         type: "Log" as components["schemas"]["MonitorType"],
       },
+      {
+        name: "Line",
+        type: "Line" as components["schemas"]["MonitorType"],
+      },
     ],
     cur_monitor_view_type: "Log" as components["schemas"]["MonitorType"],
     cur_monitor_config: {} as components["schemas"]["MonitorTypeConf"],

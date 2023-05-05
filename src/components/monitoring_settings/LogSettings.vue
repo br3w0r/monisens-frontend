@@ -19,8 +19,8 @@ export default {
   watch: {
     sensor_info(newInfo) {
       // in case of sensor change
-      this.appStore.cur_monitor_config.Log.fields = [newInfo.data[0].name];
-      this.appStore.cur_monitor_config.Log.sort_field = newInfo.data[0].name;
+      this.appStore.cur_monitor_config.Log!.fields = [newInfo.data[0].name];
+      this.appStore.cur_monitor_config.Log!.sort_field = newInfo.data[0].name;
     },
   },
   computed: {
@@ -66,10 +66,10 @@ import Log from "../monitoring/Log.vue";
   <Log
     :device_id="device_id"
     :sensor_name="sensor_info.name"
-    :fields="appStore.cur_monitor_config.Log.fields"
-    :sort_field="appStore.cur_monitor_config.Log.sort_field"
-    :sort_direction="appStore.cur_monitor_config.Log.sort_direction"
-    :limit="appStore.cur_monitor_config.Log.limit"
+    :fields="appStore.cur_monitor_config.Log!.fields"
+    :sort_field="appStore.cur_monitor_config.Log!.sort_field"
+    :sort_direction="appStore.cur_monitor_config.Log!.sort_direction"
+    :limit="appStore.cur_monitor_config.Log!.limit"
   ></Log>
 
   <br />
@@ -77,7 +77,7 @@ import Log from "../monitoring/Log.vue";
   <h3>Fields</h3>
   <VSelect
     label="Fields"
-    v-model="appStore.cur_monitor_config.Log.fields"
+    v-model="appStore.cur_monitor_config.Log!.fields"
     item-value="name"
     item-title="name"
     :items="sensor_info.data"
@@ -89,13 +89,13 @@ import Log from "../monitoring/Log.vue";
   <VTextField
     label="Limit"
     type="number"
-    v-model.number="appStore.cur_monitor_config.Log.limit"
+    v-model.number="appStore.cur_monitor_config.Log!.limit"
   ></VTextField>
 
   <h3>Sort Field</h3>
   <VSelect
     label="Sort Field"
-    v-model="appStore.cur_monitor_config.Log.sort_field"
+    v-model="appStore.cur_monitor_config.Log!.sort_field"
     item-value="name"
     item-title="name"
     :items="sensor_info.data"
@@ -106,7 +106,7 @@ import Log from "../monitoring/Log.vue";
   <h3>Sort Direction</h3>
   <VSelect
     label="Sort Direction"
-    v-model="appStore.cur_monitor_config.Log.sort_direction"
+    v-model="appStore.cur_monitor_config.Log!.sort_direction"
     :items="sort_direction_list"
     chips
   ></VSelect>
