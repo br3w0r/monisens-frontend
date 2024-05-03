@@ -3,11 +3,18 @@ import { useNewDeviceStore } from "@/store/new_device";
 import { DeviceInitState } from "@/store/new_device";
 import Connect from "./Connect.vue";
 import Configure from "./Configure.vue";
+import ErrorSnack from "@/components/common/ErrorSnack.vue";
 
 const newDeviceStore = useNewDeviceStore();
 </script>
 
 <template>
+  <!-- Error Snackbar -->
+  <ErrorSnack
+    :modelValue="newDeviceStore.show_error"
+    @update:modelValue="newDeviceStore.handle_error_close($event.valueOf())"
+    :msgs="newDeviceStore.error_msgs"></ErrorSnack>
+  
   <!-- Start init -->
   <VForm
     v-bind:disabled="!newDeviceStore.is_idle"

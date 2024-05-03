@@ -1,7 +1,7 @@
 .PHONY: gen-api
 gen-api:
 	$(info Generating contracts from swagger on localhost...)
-	npx openapi-typescript http://127.0.0.1:8080/swagger.json --output src/api/contract.d.ts --path-params-as-types
+	npx openapi-typescript http://127.0.0.1:8888/swagger.json --output src/api/contract.d.ts --path-params-as-types
 
 .PHONY: .build
 .build:

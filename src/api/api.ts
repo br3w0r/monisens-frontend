@@ -6,33 +6,7 @@ import {
   Fetch,
 } from "openapi-typescript-fetch/dist/cjs/types";
 
-const BASE_URL = "http://127.0.0.1:8080";
-// const BASE_URL = "https://f9b76dca-db1c-45f8-8fe0-14d822d9d3df.mock.pstmn.io";
-
-/** error logging middleware for testing purposes */
-async function error_handle_middleware(
-  url: string,
-  init: CustomRequestInit,
-  next: Fetch
-): Promise<ApiResponse> {
-  const res = await next(url, init).catch((reason) => {
-    console.log(init.body);
-
-    throw reason;
-  });
-
-  if (!res.ok) {
-    console.error(
-      "[API] failed to fetch: url: %s; status: %d",
-      url,
-      res.status
-    );
-    console.log(init.body);
-    console.log(res.data);
-  }
-
-  return res;
-}
+const BASE_URL = "http://127.0.0.1:8888";
 
 class Api {
   private fetcher = Fetcher.for<paths>();
@@ -40,14 +14,21 @@ class Api {
   constructor() {
     this.fetcher.configure({
       baseUrl: BASE_URL,
-      use: [error_handle_middleware],
     });
   }
 
   async start_device_init(
     name: string,
     file: File
-  ): Promise<components["schemas"]["DeviceStartInitResponse"]> {
+  ): Promise<
+    [
+      (
+        | components["schemas"]["DeviceStartInitResponse"]
+        | components["schemas"]["WebError"]
+      ),
+      boolean
+    ]
+  > {
     const form = new FormData();
     form.append("device_name", name);
     form.append("module_file", file);
@@ -57,10 +38,13 @@ class Api {
       body: form,
     };
 
-    return await fetch(
+    let resp = await fetch(
       BASE_URL + "/service/start-device-init",
       requestOptions
-    ).then((resp) => resp.json());
+    );
+    let data = await resp.json();
+
+    return [data, resp.ok];
   }
 
   public readonly connect_device = this.fetcher
@@ -80,7 +64,7 @@ class Api {
 
   public readonly get_device_list = this.fetcher
     .path("/service/get-device-list")
-    .method("post")
+    .method("get")
     .create();
 
   public readonly get_device_sensor_info = this.fetcher

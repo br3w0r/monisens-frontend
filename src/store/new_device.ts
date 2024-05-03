@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import Api from "@/api/api";
 import { components } from "@/api/contract";
 import { useAppStore } from "./app";
+import { ApiError } from "openapi-typescript-fetch";
 
 export enum DeviceInitState {
   None,
@@ -12,6 +13,12 @@ export enum DeviceInitState {
 
 export const useNewDeviceStore = defineStore("new_device", {
   state: () => ({
+    // Errors
+    error_msgs: new Array<string>(),
+    show_error: false,
+    show_error_timeout: null as NodeJS.Timeout | null,
+    err_clr_timeout: null as NodeJS.Timeout | null,
+
     device_id: 0,
     init_state: DeviceInitState.None,
     is_idle: true,
@@ -27,6 +34,51 @@ export const useNewDeviceStore = defineStore("new_device", {
       state.device_name.length > 0 && state.module_file.length == 1,
   },
   actions: {
+    handle_error(err_res: components["schemas"]["WebError"]) {
+      this.handle_error_raw("[" + err_res.code + "] " + err_res.msg);
+    },
+    handle_error_raw(err: string) {
+      if (this.show_error_timeout) {
+        clearTimeout(this.show_error_timeout);
+      }
+
+      if (this.err_clr_timeout) {
+        clearTimeout(this.err_clr_timeout);
+      }
+
+      this.error_msgs.push(err);
+      this.show_error = true;
+
+      this.show_error_timeout = setTimeout(() => {
+        this.handle_error_close(false);
+      }, 5000);
+    },
+    handle_error_close(show_error: boolean) {
+      if (show_error) {
+        return;
+      }
+
+      this.show_error = false;
+      this.err_clr_timeout = setTimeout(() => {
+        this.error_msgs = [];
+      }, 1000);
+    },
+    async with_error_handling(func: () => Promise<void>) {
+      try {
+        await func();
+      } catch (err) {
+        if (err instanceof ApiError) {
+          if (err.data.msg && err.data.code) {
+            this.handle_error(err.data);
+          } else {
+            this.handle_error_raw(
+              "[" + err.status + "] " + err.data.toString()
+            );
+          }
+        }
+      }
+    },
+
     conf_by_id(id: number): components["schemas"]["DeviceConfType"] {
       const res = this.confs.get(id);
       if (res) {
@@ -100,17 +152,8 @@ export const useNewDeviceStore = defineStore("new_device", {
       });
     },
 
-    async start_device_init() {
-      this.is_idle = false;
-
-      const res = await Api.start_device_init(
-        this.device_name,
-        this.module_file[0]
-      );
-      this.device_id = res.device_id;
-      this.conn_params = res.conn_params;
-
-      // Prepare a container for connection configuration
+    /** Prepare container for connection configuration */
+    prepare_conn_conf() {
       this.conn_params.forEach((val) => {
         let value: components["schemas"]["ConnParamValType"] = (() => {
           switch (val.typ) {
@@ -142,50 +185,78 @@ export const useNewDeviceStore = defineStore("new_device", {
           value: value,
         });
       });
+    },
 
-      this.init_state = DeviceInitState.Connect;
+    async start_device_init() {
+      this.is_idle = false;
+
+      try {
+        const [res, ok] = await Api.start_device_init(
+          this.device_name,
+          this.module_file[0]
+        );
+        if (!ok) {
+          this.handle_error(res as components["schemas"]["WebError"]);
+        } else {
+          let success_res =
+            res as components["schemas"]["DeviceStartInitResponse"];
+          this.device_id = success_res.device_id;
+          this.conn_params = success_res.conn_params;
+          this.prepare_conn_conf();
+
+          this.init_state = DeviceInitState.Connect;
+        }
+      } catch (err) {
+        this.handle_error_raw(err!.toString());
+      }
+
       this.is_idle = true;
     },
 
     async connect_device() {
       this.is_idle = false;
 
-      await Api.connect_device({
-        device_id: this.device_id,
-        connect_conf: this.connect_conf,
+      await this.with_error_handling(async () => {
+        await Api.connect_device({
+          device_id: this.device_id,
+          connect_conf: this.connect_conf,
+        });
+
+        const res = await Api.obtain_device_conf_info({
+          device_id: this.device_id,
+        });
+        this.conf_info = res.data.device_conf_info;
+
+        this.assign_conf(this.conf_info);
+
+        this.init_state = DeviceInitState.Configure;
       });
 
-      const res = await Api.obtain_device_conf_info({
-        device_id: this.device_id,
-      });
-      this.conf_info = res.data.device_conf_info;
-
-      this.assign_conf(this.conf_info);
-
-      this.init_state = DeviceInitState.Configure;
       this.is_idle = true;
     },
 
     async configure_device() {
       this.is_idle = false;
 
-      let confs = new Array<components["schemas"]["DeviceConfEntry"]>();
-      for (const [id, conf] of this.confs) {
-        confs.push({
-          id: id,
-          data: conf,
+      await this.with_error_handling(async () => {
+        let confs = new Array<components["schemas"]["DeviceConfEntry"]>();
+        for (const [id, conf] of this.confs) {
+          confs.push({
+            id: id,
+            data: conf,
+          });
+        }
+
+        await Api.configure_device({
+          device_id: this.device_id,
+          confs: confs,
         });
-      }
 
-      await Api.configure_device({
-        device_id: this.device_id,
-        confs: confs,
+        this.init_state = DeviceInitState.Done;
+
+        const appStore = useAppStore();
+        appStore.add_device(this.device_id, this.device_name);
       });
-
-      this.init_state = DeviceInitState.Done;
-
-      const appStore = useAppStore();
-      appStore.add_device(this.device_id, this.device_name);
 
       this.is_idle = true;
     },

@@ -16,7 +16,7 @@ const appStore = useAppStore();
 <template>
   <div style="text-align: center">
     <VDialog v-model="appStore._new_monitor_panel_dialog" persistent>
-      <template v-slot:activator="{ props }">
+      <template>
         <VBtn
           prepend-icon="mdi-plus"
           color="primary"

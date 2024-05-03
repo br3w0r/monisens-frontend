@@ -17,7 +17,7 @@ export interface paths {
     post: operations["connect_device"];
   };
   "/service/get-device-list": {
-    post: operations["get_device_list"];
+    get: operations["get_device_list"];
   };
   "/service/get-device-sensor-info": {
     post: operations["get_device_sensor_info"];
@@ -59,7 +59,7 @@ export interface components {
       choices: (string)[];
     };
     ConnParamConf: {
-      info?: components["schemas"]["ConnParamEntryInfo"];
+      info?: components["schemas"]["ConnParamEntryInfo"] | null;
       name: string;
       typ: components["schemas"]["ConnParamType"];
     };
@@ -85,7 +85,7 @@ export interface components {
       device_id: number;
     };
     DeviceConfEntry: {
-      data?: components["schemas"]["DeviceConfType"];
+      data?: components["schemas"]["DeviceConfType"] | null;
       /** Format: int32 */
       id: number;
     };
@@ -98,25 +98,25 @@ export interface components {
     DeviceConfInfoEntryChoiceList: {
       choices: (string)[];
       /** Format: int32 */
-      default?: number;
+      default?: number | null;
       required: boolean;
     };
     DeviceConfInfoEntryFloat: {
       /** Format: float */
-      default?: number;
+      default?: number | null;
       /** Format: float */
-      gt?: number;
+      gt?: number | null;
       /** Format: float */
-      lt?: number;
+      lt?: number | null;
       /** Format: float */
-      neq?: number;
+      neq?: number | null;
       required: boolean;
     };
     DeviceConfInfoEntryFloatRange: {
       /** Format: float */
-      def_from?: number;
+      def_from?: number | null;
       /** Format: float */
-      def_to?: number;
+      def_to?: number | null;
       /** Format: float */
       max: number;
       /** Format: float */
@@ -125,20 +125,20 @@ export interface components {
     };
     DeviceConfInfoEntryInt: {
       /** Format: int32 */
-      default?: number;
+      default?: number | null;
       /** Format: int32 */
-      gt?: number;
+      gt?: number | null;
       /** Format: int32 */
-      lt?: number;
+      lt?: number | null;
       /** Format: int32 */
-      neq?: number;
+      neq?: number | null;
       required: boolean;
     };
     DeviceConfInfoEntryIntRange: {
       /** Format: int32 */
-      def_from?: number;
+      def_from?: number | null;
       /** Format: int32 */
-      def_to?: number;
+      def_to?: number | null;
       /** Format: int32 */
       max: number;
       /** Format: int32 */
@@ -146,16 +146,16 @@ export interface components {
       required: boolean;
     };
     DeviceConfInfoEntryJSON: {
-      default?: string;
+      default?: string | null;
       required: boolean;
     };
     DeviceConfInfoEntryString: {
-      default?: string;
-      match_regex?: string;
+      default?: string | null;
+      match_regex?: string | null;
       /** Format: int32 */
-      max_len?: number;
+      max_len?: number | null;
       /** Format: int32 */
-      min_len?: number;
+      min_len?: number | null;
       required: boolean;
     };
     DeviceConfInfoEntryType: OneOf<[{
@@ -223,9 +223,9 @@ export interface components {
       /** Format: int32 */
       device_id: number;
       fields: (string)[];
-      from?: components["schemas"]["SensorData"];
+      from?: components["schemas"]["SensorData"] | null;
       /** Format: int32 */
-      limit?: number;
+      limit?: number | null;
       sensor: string;
       sort: components["schemas"]["Sort"];
     };
@@ -308,7 +308,7 @@ export interface components {
       /** Format: float */
       Float32: number;
     }, {
-      /** Format: float */
+      /** Format: double */
       Float64: number;
     }, {
       Timestamp: string;
@@ -329,17 +329,20 @@ export interface components {
     };
     Sort: {
       field: string;
-      order: components["schemas"]["SortOrder"];
+      order: components["schemas"]["SortDir"];
     };
     /** @enum {string} */
     SortDir: "ASC" | "DESC";
-    /** @enum {string} */
-    SortOrder: "ASC" | "DESC";
     TestUploadForm: {
       /** Format: binary */
       file: string;
       /** Format: byte */
       name: string;
+    };
+    WebError: {
+      /** Format: byte */
+      code: string;
+      msg: string;
     };
   };
   responses: never;
@@ -363,7 +366,11 @@ export interface operations {
       /** @description Ok response */
       200: never;
       /** @description Server error response */
-      500: never;
+      500: {
+        content: {
+          "application/json": components["schemas"]["WebError"];
+        };
+      };
     };
   };
   connect_device: {
@@ -376,7 +383,11 @@ export interface operations {
       /** @description Ok response */
       200: never;
       /** @description Server error response */
-      500: never;
+      500: {
+        content: {
+          "application/json": components["schemas"]["WebError"];
+        };
+      };
     };
   };
   get_device_list: {
@@ -388,7 +399,11 @@ export interface operations {
         };
       };
       /** @description Server error response */
-      500: never;
+      500: {
+        content: {
+          "application/json": components["schemas"]["WebError"];
+        };
+      };
     };
   };
   get_device_sensor_info: {
@@ -405,7 +420,11 @@ export interface operations {
         };
       };
       /** @description Server error response */
-      500: never;
+      500: {
+        content: {
+          "application/json": components["schemas"]["WebError"];
+        };
+      };
     };
   };
   get_monitor_conf_list: {
@@ -422,7 +441,11 @@ export interface operations {
         };
       };
       /** @description Server error response */
-      500: never;
+      500: {
+        content: {
+          "application/json": components["schemas"]["WebError"];
+        };
+      };
     };
   };
   get_sensor_data: {
@@ -439,7 +462,11 @@ export interface operations {
         };
       };
       /** @description Server error response */
-      500: never;
+      500: {
+        content: {
+          "application/json": components["schemas"]["WebError"];
+        };
+      };
     };
   };
   interrupt_device_init: {
@@ -452,7 +479,11 @@ export interface operations {
       /** @description Ok response */
       200: never;
       /** @description Server error response */
-      500: never;
+      500: {
+        content: {
+          "application/json": components["schemas"]["WebError"];
+        };
+      };
     };
   };
   obtain_device_conf_info: {
@@ -469,7 +500,11 @@ export interface operations {
         };
       };
       /** @description Server error response */
-      500: never;
+      500: {
+        content: {
+          "application/json": components["schemas"]["WebError"];
+        };
+      };
     };
   };
   save_monitor_conf: {
@@ -486,7 +521,11 @@ export interface operations {
         };
       };
       /** @description Server error response */
-      500: never;
+      500: {
+        content: {
+          "application/json": components["schemas"]["WebError"];
+        };
+      };
     };
   };
   start_device_init: {
@@ -503,7 +542,11 @@ export interface operations {
         };
       };
       /** @description Server error response */
-      500: never;
+      500: {
+        content: {
+          "application/json": components["schemas"]["WebError"];
+        };
+      };
     };
   };
 }

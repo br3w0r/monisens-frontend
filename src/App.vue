@@ -26,7 +26,7 @@ appStore.init();
       </VCard>
     </VDialog>
 
-    <VAppBar app elevation="1" color="primary">
+    <VAppBar app elevation="1" color="primary" class="app-bar">
       <VAppBarNavIcon @click.stop="appStore.menu_toggle"></VAppBarNavIcon>
       <VTabs>
         <VTab to="/" prepend-icon="mdi-home">Home</VTab>
