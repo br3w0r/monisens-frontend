@@ -6,7 +6,8 @@ import {
   Fetch,
 } from "openapi-typescript-fetch/dist/cjs/types";
 
-const BASE_URL = "http://127.0.0.1:8888";
+const BASE_URL =
+  import.meta.env.MODE == "development" ? "http://127.0.0.1:8888" : "";
 
 class Api {
   private fetcher = Fetcher.for<paths>();

@@ -75,6 +75,8 @@ export const useNewDeviceStore = defineStore("new_device", {
               "[" + err.status + "] " + err.data.toString()
             );
           }
+        } else {
+          this.handle_error_raw("[unknown] " + err?.toString());
         }
       }
     },

@@ -6,7 +6,7 @@ gen-api:
 .PHONY: .build
 .build:
 	$(info Building sources...)
-	npx vite build --mode development
+	npx vite build --mode production
 
 .PHONY: .copy
 .copy:
