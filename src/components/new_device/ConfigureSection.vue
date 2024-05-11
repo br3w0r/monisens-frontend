@@ -7,17 +7,13 @@ export default {
   name: "ConfigureSection",
   props: {
     name: String,
-    conf_info: Object as PropType<
-      components["schemas"]["DeviceConfInfoEntry"][]
+    conf_info: Object as PropType<components["schemas"]["ConfInfoEntry"][]>,
+    modelValue: Object as PropType<
+      Map<number, components["schemas"]["ConfType"]>
     >,
   },
+  emits: ["update:modelValue"],
 };
-</script>
-
-<script setup lang="ts">
-import { useNewDeviceStore } from "../../store/new_device";
-
-const newDeviceStore = useNewDeviceStore();
 </script>
 
 <template>
@@ -27,19 +23,19 @@ const newDeviceStore = useNewDeviceStore();
     <VTextField
       v-if="ci.data.String"
       :label="ci.name"
-      v-model="newDeviceStore.conf_by_id(ci.id).String"
+      v-model="modelValue!.get(ci.id)!.String"
     ></VTextField>
 
     <VTextField
       v-else-if="ci.data.Int"
       :label="ci.name"
       type="number"
-      v-model.number="newDeviceStore.conf_by_id(ci.id).Int"
+      v-model.number="modelValue!.get(ci.id)!.Int"
     ></VTextField>
 
     <RangePicker
       v-else-if="ci.data.IntRange"
-      v-model="newDeviceStore.conf_by_id(ci.id).IntRange"
+      v-model="modelValue!.get(ci.id)!.IntRange"
       :label="ci.name"
       :step="1"
       :min="ci.data.IntRange.min"
@@ -50,12 +46,12 @@ const newDeviceStore = useNewDeviceStore();
       v-else-if="ci.data.Float"
       :label="ci.name"
       type="number"
-      v-model.number="newDeviceStore.conf_by_id(ci.id).Float"
+      v-model.number="modelValue!.get(ci.id)!.Float"
     ></VTextField>
 
     <RangePicker
       v-else-if="ci.data.FloatRange"
-      v-model="newDeviceStore.conf_by_id(ci.id).FloatRange"
+      v-model="modelValue!.get(ci.id)!.FloatRange"
       :label="ci.name"
       :step="0.001"
       :min="ci.data.FloatRange.min"
@@ -65,12 +61,12 @@ const newDeviceStore = useNewDeviceStore();
     <VTextField
       v-if="ci.data.JSON"
       :label="ci.name"
-      v-model="newDeviceStore.conf_by_id(ci.id).JSON"
+      v-model="modelValue!.get(ci.id)!.JSON"
     ></VTextField>
 
     <VRadioGroup
       v-else-if="ci.data.ChoiceList"
-      v-model.number="newDeviceStore.conf_by_id(ci.id).ChoiceList"
+      v-model.number="modelValue!.get(ci.id)!.ChoiceList"
     >
       <p>{{ ci.name }}</p>
       <VRadio

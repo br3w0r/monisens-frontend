@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useNewDeviceStore } from "@/store/new_device";
+import ConfigureSection from "@/components/new_device/ConfigureSection.vue";
 
 const newDeviceStore = useNewDeviceStore();
 </script>
@@ -8,54 +9,10 @@ const newDeviceStore = useNewDeviceStore();
   <VForm v-bind:disabled="!newDeviceStore.is_idle">
     <VContainer>
       <h1>2. Connect to the device</h1>
-      <div
-        v-for="(conn_param, index) in newDeviceStore.conn_params"
-        :key="index"
-      >
-        <!-- Bool -->
-        <VCheckbox
-          v-if="conn_param.typ == 'Bool'"
-          :label="conn_param.name"
-          v-model="newDeviceStore.connect_conf[index].value.Bool"
-        ></VCheckbox>
-
-        <!-- Int -->
-        <VTextField
-          v-else-if="conn_param.typ == 'Int'"
-          :label="conn_param.name"
-          type="number"
-          v-model.number="newDeviceStore.connect_conf[index].value.Int"
-        ></VTextField>
-
-        <!-- Float -->
-        <VTextField
-          v-else-if="conn_param.typ == 'Float'"
-          :label="conn_param.name"
-          type="number"
-          v-model.number="newDeviceStore.connect_conf[index].value.Float"
-        ></VTextField>
-
-        <!-- String -->
-        <VTextField
-          v-else-if="conn_param.typ == 'String'"
-          :label="conn_param.name"
-          v-model="newDeviceStore.connect_conf[index].value.String"
-        ></VTextField>
-
-        <!-- ChoiceList -->
-        <VRadioGroup
-          v-else-if="conn_param.typ == 'ChoiceList'"
-          v-model.number="newDeviceStore.connect_conf[index].value.Int"
-        >
-          <p>{{ conn_param.name }}</p>
-          <VRadio
-            v-for="(choice, index) in conn_param.info!.ChoiceList.choices"
-            :key="index"
-            :label="choice"
-            :value="index"
-          ></VRadio>
-        </VRadioGroup>
-      </div>
+      <ConfigureSection
+        :conf_info="newDeviceStore.conn_conf_info"
+        v-model="newDeviceStore.conn_conf"
+      ></ConfigureSection>
 
       <VBtn
         :loading="!newDeviceStore.is_idle"

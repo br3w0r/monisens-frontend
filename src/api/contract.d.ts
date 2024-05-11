@@ -3,11 +3,16 @@
  * Do not make direct changes to the file.
  */
 
-
 /** OneOf type helpers */
 type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
-type XOR<T, U> = (T | U) extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;
-type OneOf<T extends any[]> = T extends [infer Only] ? Only : T extends [infer A, infer B, ...infer Rest] ? OneOf<[XOR<A, B>, ...Rest]> : never;
+type XOR<T, U> = T | U extends object
+  ? (Without<T, U> & U) | (Without<U, T> & T)
+  : T | U;
+type OneOf<T extends any[]> = T extends [infer Only]
+  ? Only
+  : T extends [infer A, infer B, ...infer Rest]
+  ? OneOf<[XOR<A, B>, ...Rest]>
+  : never;
 
 export interface paths {
   "/service/configure-device": {
@@ -46,62 +51,24 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
-    ConfigureDeviceRequest: {
-      confs: (components["schemas"]["DeviceConfEntry"])[];
-      /** Format: int32 */
-      device_id: number;
-    };
-    ConnParam: {
-      name: string;
-      value: components["schemas"]["ConnParamValType"];
-    };
-    ConnParamChoiceListInfo: {
-      choices: (string)[];
-    };
-    ConnParamConf: {
-      info?: components["schemas"]["ConnParamEntryInfo"] | null;
-      name: string;
-      typ: components["schemas"]["ConnParamType"];
-    };
-    ConnParamEntryInfo: {
-      ChoiceList: components["schemas"]["ConnParamChoiceListInfo"];
-    };
-    /** @enum {string} */
-    ConnParamType: "Bool" | "Int" | "Float" | "String" | "ChoiceList";
-    ConnParamValType: OneOf<[{
-      Bool: boolean;
-    }, {
-      /** Format: int32 */
-      Int: number;
-    }, {
-      /** Format: float */
-      Float: number;
-    }, {
-      String: string;
-    }]>;
-    ConnectDeviceRequest: {
-      connect_conf: (components["schemas"]["ConnParam"])[];
-      /** Format: int32 */
-      device_id: number;
-    };
-    DeviceConfEntry: {
-      data?: components["schemas"]["DeviceConfType"] | null;
+    ConfEntry: {
+      data?: components["schemas"]["ConfType"] | null;
       /** Format: int32 */
       id: number;
     };
-    DeviceConfInfoEntry: {
-      data: components["schemas"]["DeviceConfInfoEntryType"];
+    ConfInfoEntry: {
+      data: components["schemas"]["ConfInfoEntryType"];
       /** Format: int32 */
       id: number;
       name: string;
     };
-    DeviceConfInfoEntryChoiceList: {
-      choices: (string)[];
+    ConfInfoEntryChoiceList: {
+      choices: string[];
       /** Format: int32 */
       default?: number | null;
       required: boolean;
     };
-    DeviceConfInfoEntryFloat: {
+    ConfInfoEntryFloat: {
       /** Format: float */
       default?: number | null;
       /** Format: float */
@@ -112,7 +79,7 @@ export interface components {
       neq?: number | null;
       required: boolean;
     };
-    DeviceConfInfoEntryFloatRange: {
+    ConfInfoEntryFloatRange: {
       /** Format: float */
       def_from?: number | null;
       /** Format: float */
@@ -123,7 +90,7 @@ export interface components {
       min: number;
       required: boolean;
     };
-    DeviceConfInfoEntryInt: {
+    ConfInfoEntryInt: {
       /** Format: int32 */
       default?: number | null;
       /** Format: int32 */
@@ -134,7 +101,7 @@ export interface components {
       neq?: number | null;
       required: boolean;
     };
-    DeviceConfInfoEntryIntRange: {
+    ConfInfoEntryIntRange: {
       /** Format: int32 */
       def_from?: number | null;
       /** Format: int32 */
@@ -145,11 +112,11 @@ export interface components {
       min: number;
       required: boolean;
     };
-    DeviceConfInfoEntryJSON: {
+    ConfInfoEntryJSON: {
       default?: string | null;
       required: boolean;
     };
-    DeviceConfInfoEntryString: {
+    ConfInfoEntryString: {
       default?: string | null;
       match_regex?: string | null;
       /** Format: int32 */
@@ -158,41 +125,72 @@ export interface components {
       min_len?: number | null;
       required: boolean;
     };
-    DeviceConfInfoEntryType: OneOf<[{
-      String: components["schemas"]["DeviceConfInfoEntryString"];
-    }, {
-      Int: components["schemas"]["DeviceConfInfoEntryInt"];
-    }, {
-      IntRange: components["schemas"]["DeviceConfInfoEntryIntRange"];
-    }, {
-      Float: components["schemas"]["DeviceConfInfoEntryFloat"];
-    }, {
-      FloatRange: components["schemas"]["DeviceConfInfoEntryFloatRange"];
-    }, {
-      JSON: components["schemas"]["DeviceConfInfoEntryJSON"];
-    }, {
-      ChoiceList: components["schemas"]["DeviceConfInfoEntryChoiceList"];
-    }, {
-      Section: (components["schemas"]["DeviceConfInfoEntry"])[];
-    }]>;
-    DeviceConfType: OneOf<[{
-      String: string;
-    }, {
+    ConfInfoEntryType: OneOf<
+      [
+        {
+          String: components["schemas"]["ConfInfoEntryString"];
+        },
+        {
+          Int: components["schemas"]["ConfInfoEntryInt"];
+        },
+        {
+          IntRange: components["schemas"]["ConfInfoEntryIntRange"];
+        },
+        {
+          Float: components["schemas"]["ConfInfoEntryFloat"];
+        },
+        {
+          FloatRange: components["schemas"]["ConfInfoEntryFloatRange"];
+        },
+        {
+          JSON: components["schemas"]["ConfInfoEntryJSON"];
+        },
+        {
+          ChoiceList: components["schemas"]["ConfInfoEntryChoiceList"];
+        },
+        {
+          Section: components["schemas"]["ConfInfoEntry"][];
+        }
+      ]
+    >;
+    ConfType: OneOf<
+      [
+        {
+          String: string;
+        },
+        {
+          /** Format: int32 */
+          Int: number;
+        },
+        {
+          IntRange: number[];
+        },
+        {
+          /** Format: float */
+          Float: number;
+        },
+        {
+          FloatRange: number[];
+        },
+        {
+          JSON: string;
+        },
+        {
+          /** Format: int32 */
+          ChoiceList: number;
+        }
+      ]
+    >;
+    ConfigureDeviceRequest: {
+      confs: components["schemas"]["ConfEntry"][];
       /** Format: int32 */
-      Int: number;
-    }, {
-      IntRange: (number)[];
-    }, {
-      /** Format: float */
-      Float: number;
-    }, {
-      FloatRange: (number)[];
-    }, {
-      JSON: string;
-    }, {
+      device_id: number;
+    };
+    ConnectDeviceRequest: {
+      connect_conf: components["schemas"]["ConfEntry"][];
       /** Format: int32 */
-      ChoiceList: number;
-    }]>;
+      device_id: number;
+    };
     DeviceEntry: {
       /** Format: int32 */
       id: number;
@@ -205,24 +203,24 @@ export interface components {
       module_file: string;
     };
     DeviceStartInitResponse: {
-      conn_params: (components["schemas"]["ConnParamConf"])[];
+      conn_params: components["schemas"]["ConfInfoEntry"][];
       /** Format: int32 */
       device_id: number;
     };
     GetDeviceListResponse: {
-      result: (components["schemas"]["DeviceEntry"])[];
+      result: components["schemas"]["DeviceEntry"][];
     };
     GetDeviceSensorInfoRequest: {
       /** Format: int32 */
       device_id: number;
     };
     GetDeviceSensorInfoResponse: {
-      device_sensor_info: (components["schemas"]["SensorInfo"])[];
+      device_sensor_info: components["schemas"]["SensorInfo"][];
     };
     GetSensorDataRequest: {
       /** Format: int32 */
       device_id: number;
-      fields: (string)[];
+      fields: string[];
       from?: components["schemas"]["SensorData"] | null;
       /** Format: int32 */
       limit?: number | null;
@@ -230,9 +228,9 @@ export interface components {
       sort: components["schemas"]["Sort"];
     };
     GetSensorDataResponse: {
-      result: ({
-          [key: string]: components["schemas"]["SensorData"] | undefined;
-        })[];
+      result: {
+        [key: string]: components["schemas"]["SensorData"] | undefined;
+      }[];
     };
     InterruptDeviceInitRequest: {
       /** Format: int32 */
@@ -255,7 +253,7 @@ export interface components {
       filter: components["schemas"]["MonitorConfListFilter"];
     };
     MonitorConfListResponse: {
-      result: (components["schemas"]["MonitorConfListEntry"])[];
+      result: components["schemas"]["MonitorConfListEntry"][];
     };
     MonitorLineConf: {
       /** Format: int32 */
@@ -264,7 +262,7 @@ export interface components {
       y_field: string;
     };
     MonitorLogConf: {
-      fields: (string)[];
+      fields: string[];
       /** Format: int32 */
       limit: number;
       sort_direction: components["schemas"]["SortDir"];
@@ -272,17 +270,22 @@ export interface components {
     };
     /** @enum {string} */
     MonitorType: "Log" | "Line";
-    MonitorTypeConf: OneOf<[{
-      Log: components["schemas"]["MonitorLogConf"];
-    }, {
-      Line: components["schemas"]["MonitorLineConf"];
-    }]>;
+    MonitorTypeConf: OneOf<
+      [
+        {
+          Log: components["schemas"]["MonitorLogConf"];
+        },
+        {
+          Line: components["schemas"]["MonitorLineConf"];
+        }
+      ]
+    >;
     ObtainDeviceConfInfoRequest: {
       /** Format: int32 */
       device_id: number;
     };
     ObtainDeviceConfInfoResponse: {
-      device_conf_info: (components["schemas"]["DeviceConfInfoEntry"])[];
+      device_conf_info: components["schemas"]["ConfInfoEntry"][];
     };
     SaveMonitorConfRequest: {
       config: components["schemas"]["MonitorTypeConf"];
@@ -295,36 +298,55 @@ export interface components {
       /** Format: int32 */
       id: number;
     };
-    SensorData: OneOf<[{
-      /** Format: int32 */
-      Int16: number;
-    }, {
-      /** Format: int32 */
-      Int32: number;
-    }, {
-      /** Format: int64 */
-      Int64: number;
-    }, {
-      /** Format: float */
-      Float32: number;
-    }, {
-      /** Format: double */
-      Float64: number;
-    }, {
-      Timestamp: string;
-    }, {
-      String: string;
-    }, {
-      JSON: string;
-    }]>;
+    SensorData: OneOf<
+      [
+        {
+          /** Format: int32 */
+          Int16: number;
+        },
+        {
+          /** Format: int32 */
+          Int32: number;
+        },
+        {
+          /** Format: int64 */
+          Int64: number;
+        },
+        {
+          /** Format: float */
+          Float32: number;
+        },
+        {
+          /** Format: double */
+          Float64: number;
+        },
+        {
+          Timestamp: string;
+        },
+        {
+          String: string;
+        },
+        {
+          JSON: string;
+        }
+      ]
+    >;
     SensorDataInfo: {
       name: string;
       typ: components["schemas"]["SensorDataType"];
     };
     /** @enum {string} */
-    SensorDataType: "Int16" | "Int32" | "Int64" | "Float32" | "Float64" | "Timestamp" | "String" | "JSON";
+    SensorDataType:
+      | "Int16"
+      | "Int32"
+      | "Int64"
+      | "Float32"
+      | "Float64"
+      | "Timestamp"
+      | "String"
+      | "JSON";
     SensorInfo: {
-      data: (components["schemas"]["SensorDataInfo"])[];
+      data: components["schemas"]["SensorDataInfo"][];
       name: string;
     };
     Sort: {
@@ -355,7 +377,6 @@ export interface components {
 export type external = Record<string, never>;
 
 export interface operations {
-
   configure_device: {
     requestBody: {
       content: {
@@ -366,7 +387,7 @@ export interface operations {
       /** @description Ok response */
       200: never;
       /** @description Server error response */
-      500: {
+      default: {
         content: {
           "application/json": components["schemas"]["WebError"];
         };
@@ -383,7 +404,7 @@ export interface operations {
       /** @description Ok response */
       200: never;
       /** @description Server error response */
-      500: {
+      default: {
         content: {
           "application/json": components["schemas"]["WebError"];
         };
@@ -399,7 +420,7 @@ export interface operations {
         };
       };
       /** @description Server error response */
-      500: {
+      default: {
         content: {
           "application/json": components["schemas"]["WebError"];
         };
@@ -420,7 +441,7 @@ export interface operations {
         };
       };
       /** @description Server error response */
-      500: {
+      default: {
         content: {
           "application/json": components["schemas"]["WebError"];
         };
@@ -441,7 +462,7 @@ export interface operations {
         };
       };
       /** @description Server error response */
-      500: {
+      default: {
         content: {
           "application/json": components["schemas"]["WebError"];
         };
@@ -462,7 +483,7 @@ export interface operations {
         };
       };
       /** @description Server error response */
-      500: {
+      default: {
         content: {
           "application/json": components["schemas"]["WebError"];
         };
@@ -479,7 +500,7 @@ export interface operations {
       /** @description Ok response */
       200: never;
       /** @description Server error response */
-      500: {
+      default: {
         content: {
           "application/json": components["schemas"]["WebError"];
         };
@@ -500,7 +521,7 @@ export interface operations {
         };
       };
       /** @description Server error response */
-      500: {
+      default: {
         content: {
           "application/json": components["schemas"]["WebError"];
         };
@@ -521,7 +542,7 @@ export interface operations {
         };
       };
       /** @description Server error response */
-      500: {
+      default: {
         content: {
           "application/json": components["schemas"]["WebError"];
         };
@@ -542,7 +563,7 @@ export interface operations {
         };
       };
       /** @description Server error response */
-      500: {
+      default: {
         content: {
           "application/json": components["schemas"]["WebError"];
         };

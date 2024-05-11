@@ -24,10 +24,10 @@ export const useNewDeviceStore = defineStore("new_device", {
     is_idle: true,
     device_name: "",
     module_file: new Array<File>(),
-    conn_params: new Array<components["schemas"]["ConnParamConf"]>(),
-    connect_conf: new Array<components["schemas"]["ConnParam"]>(),
-    conf_info: new Array<components["schemas"]["DeviceConfInfoEntry"]>(),
-    confs: new Map<number, components["schemas"]["DeviceConfType"]>(),
+    conn_conf_info: new Array<components["schemas"]["ConfInfoEntry"]>(),
+    conn_conf: new Map<number, components["schemas"]["ConfType"]>(),
+    device_conf_info: new Array<components["schemas"]["ConfInfoEntry"]>(),
+    device_conf: new Map<number, components["schemas"]["ConfType"]>(),
   }),
   getters: {
     start_init_available: (state) =>
@@ -81,24 +81,18 @@ export const useNewDeviceStore = defineStore("new_device", {
       }
     },
 
-    conf_by_id(id: number): components["schemas"]["DeviceConfType"] {
-      const res = this.confs.get(id);
-      if (res) {
-        return res;
-      }
-      console.error("[conf_by_id]: config with id %d was not found", id);
-      return {} as components["schemas"]["DeviceConfType"];
-    },
-
-    /** `assign_conf` prepares a container for device configuration */
-    assign_conf(value: components["schemas"]["DeviceConfInfoEntry"][]) {
+    /** `assign_conf` prepares an `into` container for configuration */
+    assign_conf(
+      into: Map<number, components["schemas"]["ConfType"]>,
+      value: components["schemas"]["ConfInfoEntry"][]
+    ) {
       value.forEach((val) => {
         if (val.id == 0 && val.data.Section) {
-          this.assign_conf(val.data.Section);
+          this.assign_conf(into, val.data.Section);
           return;
         }
 
-        const conf: components["schemas"]["DeviceConfType"] = (() => {
+        let conf: components["schemas"]["ConfType"] = (() => {
           if (val.data.String) {
             return {
               String: val.data.String.default ? val.data.String.default : "",
@@ -150,43 +144,22 @@ export const useNewDeviceStore = defineStore("new_device", {
           }
         })();
 
-        this.confs.set(val.id, conf);
+        into.set(val.id, conf);
       });
     },
 
-    /** Prepare container for connection configuration */
-    prepare_conn_conf() {
-      this.conn_params.forEach((val) => {
-        let value: components["schemas"]["ConnParamValType"] = (() => {
-          switch (val.typ) {
-            case "Bool":
-              return {
-                Bool: false,
-              };
-            case "Int":
-              return {
-                Int: 0,
-              };
-            case "Float":
-              return {
-                Float: 0.0,
-              };
-            case "String":
-              return {
-                String: "text",
-              };
-            case "ChoiceList":
-              return {
-                Int: 0,
-              };
-          }
-        })();
-
-        this.connect_conf.push({
-          name: val.name,
-          value: value,
+    conf_array_from_map(
+      val: Map<number, components["schemas"]["ConfType"]>
+    ): components["schemas"]["ConfEntry"][] {
+      let confs = new Array<components["schemas"]["ConfEntry"]>();
+      for (const [id, conf] of val) {
+        confs.push({
+          id: id,
+          data: conf,
         });
-      });
+      }
+
+      return confs;
     },
 
     async start_device_init() {
@@ -203,8 +176,8 @@ export const useNewDeviceStore = defineStore("new_device", {
           let success_res =
             res as components["schemas"]["DeviceStartInitResponse"];
           this.device_id = success_res.device_id;
-          this.conn_params = success_res.conn_params;
-          this.prepare_conn_conf();
+          this.conn_conf_info = success_res.conn_params;
+          this.assign_conf(this.conn_conf, success_res.conn_params);
 
           this.init_state = DeviceInitState.Connect;
         }
@@ -219,17 +192,19 @@ export const useNewDeviceStore = defineStore("new_device", {
       this.is_idle = false;
 
       await this.with_error_handling(async () => {
+        let confs = this.conf_array_from_map(this.device_conf);
+
         await Api.connect_device({
           device_id: this.device_id,
-          connect_conf: this.connect_conf,
+          connect_conf: confs,
         });
 
         const res = await Api.obtain_device_conf_info({
           device_id: this.device_id,
         });
-        this.conf_info = res.data.device_conf_info;
+        this.device_conf_info = res.data.device_conf_info;
 
-        this.assign_conf(this.conf_info);
+        this.assign_conf(this.device_conf, this.device_conf_info);
 
         this.init_state = DeviceInitState.Configure;
       });
@@ -241,13 +216,7 @@ export const useNewDeviceStore = defineStore("new_device", {
       this.is_idle = false;
 
       await this.with_error_handling(async () => {
-        let confs = new Array<components["schemas"]["DeviceConfEntry"]>();
-        for (const [id, conf] of this.confs) {
-          confs.push({
-            id: id,
-            data: conf,
-          });
-        }
+        let confs = this.conf_array_from_map(this.device_conf);
 
         await Api.configure_device({
           device_id: this.device_id,

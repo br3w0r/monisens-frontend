@@ -8,7 +8,11 @@ const newDeviceStore = useNewDeviceStore();
 <template>
   <VForm v-bind:disabled="!newDeviceStore.is_idle">
     <h1>3. Configure device</h1>
-    <ConfigureSection :conf_info="newDeviceStore.conf_info"></ConfigureSection>
+    <ConfigureSection
+      :conf_info="newDeviceStore.device_conf_info"
+      v-model="newDeviceStore.device_conf"
+    ></ConfigureSection>
+
     <VBtn
       :loading="!newDeviceStore.is_idle"
       :disabled="
