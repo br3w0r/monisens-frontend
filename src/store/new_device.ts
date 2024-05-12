@@ -192,7 +192,7 @@ export const useNewDeviceStore = defineStore("new_device", {
       this.is_idle = false;
 
       await this.with_error_handling(async () => {
-        let confs = this.conf_array_from_map(this.device_conf);
+        let confs = this.conf_array_from_map(this.conn_conf);
 
         await Api.connect_device({
           device_id: this.device_id,
